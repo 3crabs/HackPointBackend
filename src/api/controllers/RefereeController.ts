@@ -95,7 +95,7 @@ export class RefereeController {
         return this.refereeService.updateReferee(refereeId, body);
     }
 
-    @Post('/referee/login')
+    @Post('/login')
     @OpenAPI({
         tags: ['Referee'], summary: 'login referee',
         responses: { 200: { headers: { 'Set-Cookie': { schema: {
@@ -121,7 +121,7 @@ export class RefereeController {
     }
 
     @Authorized(['referee'])
-    @Post('/referee/logout')
+    @Post('/logout')
     @OpenAPI({
         tags: ['Referee'], summary: 'logout referee', security: [{ CookieAuth: [] }],
         responses: { 200: { headers: { 'Set-Cookie': { schema: {

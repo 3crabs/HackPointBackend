@@ -17,7 +17,7 @@ export const expressLoader: MicroframeworkLoader = (settings: MicroframeworkSett
          * We could have also use useExpressServer here to attach controllers to an existing express instance.
          */
         const expressApp: Application = createExpressServer({
-            cors: true,
+            cors: false,
             classTransformer: true,
             routePrefix: env.app.routePrefix,
             defaultErrorHandler: false,
