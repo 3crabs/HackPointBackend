@@ -26,7 +26,7 @@ export class CreateRefereeTable1621010898066 implements MigrationInterface {
                     type: 'text',
                     isPrimary: false,
                     isNullable: true,
-                    default: 'regular',
+                    default: `'regular'`,
                 }, {
                     name: 'login',
                     type: 'text',
