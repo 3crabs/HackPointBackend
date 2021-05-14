@@ -3,8 +3,8 @@ import * as path from 'path';
 
 import * as pkg from '../package.json';
 import {
-    getOsEnv, getOsEnvArray, getOsEnvOptional, getOsPath, getOsPaths, normalizePort, toBool,
-    toNumber
+    getCookieSamesiteOption, getOsEnv, getOsEnvArray, getOsEnvOptional, getOsPath, getOsPaths,
+    normalizePort, toBool, toNumber
 } from './lib/env';
 
 /**
@@ -42,6 +42,11 @@ export const env = {
             interceptors: getOsPaths('INTERCEPTORS'),
             subscribers: getOsPaths('SUBSCRIBERS'),
             resolvers: getOsPaths('RESOLVERS'),
+        },
+        cookie: {
+            httpOnly: toBool(getOsEnv('APP_AUTH_COOKIE_HTTPONLY')),
+            secure: toBool(getOsEnv('APP_AUTH_COOKIE_SECURE')),
+            sameSite: getCookieSamesiteOption('APP_AUTH_COOKIE_SAMESITE'),
         },
     },
     log: {

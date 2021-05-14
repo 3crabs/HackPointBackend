@@ -1,9 +1,11 @@
 import { plainToClass } from 'class-transformer';
 import crypto from 'crypto';
+import * as jwt from 'jsonwebtoken';
 import { Service } from 'typedi';
 import { OrmRepository } from 'typeorm-typedi-extensions';
 
 import { Logger, LoggerInterface } from '../../decorators/Logger';
+import { env } from '../../env';
 import { CreationRefereeRequest } from '../controllers/requests/CreationRefereeRequest';
 import { UpdationRefereeRequest } from '../controllers/requests/UpdationRefereeRequest';
 import { RefereeResponse } from '../controllers/responses/RefereeResponse';
@@ -81,6 +83,28 @@ export class RefereeService {
             await this.refereeRepository.findOne(savedReferee.id),
             { excludeExtraneousValues: true }
         );
+    }
+
+    public async loginReferee(login: string, password: string): Promise<string> {
+        this.log.info('RefereeService:loginReferee', { login });
+        const referee: Referee = await this.refereeRepository.findOne({
+            where: {
+                login,
+                password,
+            },
+        });
+        const token: string = jwt.sign({ refereeId: referee.id, login: referee.login }, env.app.jwtSecret);
+        const redisClient = (global as any).frameworkSettings.getData('redis_client');
+        await redisClient.setAsync(token, JSON.stringify({ refereeId: referee.id, login: referee.login, role: referee.type }));
+        return token;
+    }
+
+    public async logoutReferee(cookie: string): Promise<void> {
+        this.log.info('RefereeService:logoutReferee');
+        const redisClient = (global as any).frameworkSettings.getData('redis_client');
+        if (cookie) {
+            await redisClient.delAsync(cookie);
+        }
     }
 
 }

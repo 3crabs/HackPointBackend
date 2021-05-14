@@ -52,3 +52,18 @@ export function normalizePort(port: string): number | string | boolean {
     }
     return false;
 }
+
+export function getCookieSamesiteOption(key: string): boolean | 'lax' | 'strict' | 'none' {
+    const param = getOsEnv(key);
+    if (param === 'lax') {
+        return 'lax';
+    } else if (param === 'strict') {
+        return 'strict';
+    } else if (param === 'none') {
+        return 'none';
+    } else if (param === 'true') {
+        return true;
+    } else {
+        return false;
+    }
+}

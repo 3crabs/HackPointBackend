@@ -1,5 +1,5 @@
 import {
-    Body, Delete, Get, JsonController, OnUndefined, Param, Post, Put, QueryParam
+    Authorized, Body, Delete, Get, JsonController, OnUndefined, Param, Post, Put, QueryParam
 } from 'routing-controllers';
 import { OpenAPI, ResponseSchema } from 'routing-controllers-openapi';
 
@@ -20,9 +20,10 @@ export class TeamController {
         private teamService: TeamService
     ) { }
 
+    @Authorized(['referee'])
     @Get('/admin/team')
     @OpenAPI({
-        summary: 'get teams', description: 'Teams',
+        summary: 'get teams', description: 'Teams', security: [{ CookieAuth: [] }],
     })
     @ResponseSchema(TeamResponse, { description: 'Teams', isArray: true })
     @ResponseSchema(ErrorResponse, { description: 'Unauthorized', statusCode: '401' })
@@ -33,9 +34,10 @@ export class TeamController {
         return this.teamService.getTeams(skip, take);
     }
 
+    @Authorized(['referee'])
     @Post('/admin/team')
     @OpenAPI({
-        summary: 'create team',
+        summary: 'create team', security: [{ CookieAuth: [] }],
     })
     @ResponseSchema(TeamResponse, { description: 'teams' })
     @ResponseSchema(ErrorResponse, { description: 'Unauthorized', statusCode: '401' })
@@ -46,9 +48,10 @@ export class TeamController {
         return this.teamService.createTeam(body);
     }
 
+    @Authorized(['referee'])
     @Get('/admin/team/:id')
     @OpenAPI({
-        summary: 'get team by id',
+        summary: 'get team by id', security: [{ CookieAuth: [] }],
     })
     @OnUndefined(TeamNotFoundError)
     @ResponseSchema(TeamResponse, { description: 'team' })
@@ -58,9 +61,10 @@ export class TeamController {
         return this.teamService.getTeamById(teamId);
     }
 
+    @Authorized(['referee'])
     @Delete('/admin/team/:id')
     @OpenAPI({
-        summary: 'delete team by id',
+        summary: 'delete team by id', security: [{ CookieAuth: [] }],
     })
     @OnUndefined(TeamNotFoundError)
     @ResponseSchema(TeamResponse, { description: 'team' })
@@ -70,9 +74,10 @@ export class TeamController {
         return this.teamService.deleteTeam(teamId);
     }
 
+    @Authorized(['referee'])
     @Put('/admin/team/:id')
     @OpenAPI({
-        summary: 'update team by id',
+        summary: 'update team by id', security: [{ CookieAuth: [] }],
     })
     @OnUndefined(TeamNotFoundError)
     @ResponseSchema(TeamResponse)

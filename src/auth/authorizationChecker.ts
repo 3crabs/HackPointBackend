@@ -13,7 +13,7 @@ export function authorizationChecker(connection: Connection): (action: Action, r
     return async function innerAuthorizationChecker(action: Action, roles: string[]): Promise<boolean> {
 
         let user: any;
-        if (roles.find((element) => element.startsWith('sign'))) {
+        if (roles.find((element) => element.startsWith('referee'))) {
             user = await authService.getAdminByAccessCookie(action.request);
         } else {
             user = await authService.getMerchantByAccessToken(action.request);

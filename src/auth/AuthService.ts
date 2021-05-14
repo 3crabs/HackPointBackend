@@ -2,7 +2,9 @@ import * as express from 'express';
 import { IncomingMessage } from 'http';
 import * as jwt from 'jsonwebtoken';
 import { Service } from 'typedi';
+import { OrmRepository } from 'typeorm-typedi-extensions';
 
+import { RefereeRepository } from '../api/repositories/RefereeRepository';
 import { Logger, LoggerInterface } from '../decorators/Logger';
 import { env } from '../env';
 
@@ -10,7 +12,8 @@ import { env } from '../env';
 export class AuthService {
 
     public constructor(
-        @Logger(__filename) private log: LoggerInterface
+        @Logger(__filename) private log: LoggerInterface,
+        @OrmRepository() private refereeRepository: RefereeRepository
     ) { }
 
     public async getMerchantByAccessToken(req: IncomingMessage | express.Request): Promise<any> {
@@ -45,7 +48,7 @@ export class AuthService {
     }
 
     public async getAdminByAccessCookie(req: express.Request & IncomingMessage): Promise<any> {
-        const authorization = req.cookies._auth;
+        const authorization = req.headers.cookie.split('=')[1];
 
         if (authorization) {
             this.log.info('AuthService:getAdminByAccessCookie', { message: 'Admin credentials provided by the client' });
@@ -62,20 +65,14 @@ export class AuthService {
             if (decoded.exp < Date.now()) {
                 return undefined;
             }
-            const adminId = decoded.adminId;
-            if (adminId) {
-                // const admin = await this.adminRepository.findOne(adminId, {
-                //     relations: ['permissionList'],
-                // });
-                // if (!admin) {
-                //     this.log.warn('AuthService:getAdminByAccessCookie', { message: 'This user was deleted by system', adminId });
-                //     return undefined;
-                // }
-                // if (!admin.permissionList.admin_canLoginAdmin) {
-                //     this.log.warn('AuthService:getAdminByAccessCookie', { message: 'This user can not login according to permissionList', adminId });
-                //     return undefined;
-                // }
-                // return admin;
+            const refereeId = decoded.refereeId;
+            if (refereeId) {
+                const referee = await this.refereeRepository.findOne(refereeId);
+                if (!referee) {
+                    this.log.warn('AuthService:getAdminByAccessCookie', { message: 'This user was deleted by system', refereeId });
+                    return undefined;
+                }
+                return referee;
             }
         }
         this.log.warn('AuthService:getAdminByAccessCookie', { message: 'No credentials provided by the client' });

@@ -38,6 +38,7 @@
     "cls-hooked": "^4.2.2",
     "cls-redis-patch": "^0.0.1",
     "commander": "^5.1.0",
+    "cookie-parser": "^1.4.5",
     "copyfiles": "^2.3.0",
     "cors": "^2.8.5",
     "dataloader": "^1.3.0",
