@@ -57,7 +57,7 @@ export class RefereeController {
     @Authorized(['referee'])
     @Get('/admin/referee/:id')
     @OpenAPI({
-        summary: 'get referee by id',
+        summary: 'get referee by id', security: [{ CookieAuth: [] }],
     })
     @OnUndefined(RefereeNotFoundError)
     @ResponseSchema(RefereeResponse, { description: 'referee' })
@@ -97,7 +97,7 @@ export class RefereeController {
 
     @Post('/referee/login')
     @OpenAPI({
-        tags: ['Referee'], summary: 'login referee', security: [{ CookieAuth: [] }],
+        tags: ['Referee'], summary: 'login referee',
         responses: { 200: { headers: { 'Set-Cookie': { schema: {
             type: 'string', example: '_auth=abcdefghijklmnopqrstuvwxyz;Path=/;HttpOnly;SameSite=Strict;Secure' }, description: 'JWT access token in cookie' } },
         } },
@@ -143,6 +143,20 @@ export class RefereeController {
             sameSite: env.app.cookie.sameSite,
         });
         return { status: 'OK' };
+    }
+
+    @Post('/login/check')
+    @ResponseSchema(SuccessResponse, { description: 'OK. Login' })
+    @ResponseSchema(ErrorResponse, { description: 'Login or password not correct.', statusCode: '400' })
+    @ResponseSchema(ErrorResponse, { description: 'Access denied.', statusCode: '403' })
+    public async checkCookie(
+        @AccessCookie() cookie: string
+    ): Promise<boolean> {
+        console.log(cookie);
+        if (!cookie) {
+            return false;
+        }
+        return true;
     }
 
 }
