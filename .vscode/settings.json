@@ -1,0 +1,19 @@
+{
+    "typescript.tsdk": "./node_modules/typescript/lib",
+    "cSpell.enabled": true,
+    "files.trimTrailingWhitespace": true,
+    "files.exclude": {
+        "tsconfig.build.json": true,
+    },
+    "eslint.enable": true,
+    "eslint.validate": [
+        "javascript"
+    ],
+    "editor.formatOnSave": false,
+    "eslint.alwaysShowStatus": true,
+    "importSorter.generalConfiguration.sortOnBeforeSave": true,
+    "debug.node.autoAttach": "off",
+    "editor.codeActionsOnSave": {
+        "source.fixAll.eslint": false
+    },
+}

@@ -1,0 +1,25 @@
+{
+    "version": "2.0.0",
+    "command": "npm",
+    "tasks": [
+        {
+            "label": "build",
+            "type": "shell",
+            "args": [
+                "run",
+                "build"
+            ],
+            "problemMatcher": [],
+            "group": "build"
+        },
+        {
+            "label": "test",
+            "type": "shell",
+            "args": [
+                "test"
+            ],
+            "problemMatcher": [],
+            "group": "test"
+        }
+    ]
+}
