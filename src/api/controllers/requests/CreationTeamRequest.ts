@@ -7,6 +7,7 @@ export class CreationTeamRequest {
     @IsString()
     public name: string;
 
+    @IsOptional()
     @IsString()
     public nameProject: string;
 

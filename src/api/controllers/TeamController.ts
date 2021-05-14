@@ -12,7 +12,6 @@ import { TeamResponse } from './responses/TeamResponse';
 
 @JsonController()
 @OpenAPI({
-    security: [{ ApiKeyAuth: [] }],
     tags: ['Team'],
 })
 export class TeamController {
