@@ -6,7 +6,7 @@ import { Logger, LoggerInterface } from '../../decorators/Logger';
 import { CreationTeamRequest } from '../controllers/requests/CreationTeamRequest';
 import { UpdationTeamRequest } from '../controllers/requests/UpdationTeamRequest';
 import { TeamResponse } from '../controllers/responses/TeamResponse';
-import { Team } from '../models/Team';
+import { StatusTeam, Team } from '../models/Team';
 import { TeamRepository } from '../repositories/TeamRepository';
 
 @Service()
@@ -19,7 +19,13 @@ export class TeamService {
 
     public async getTeams(skip: number = 0, take: number = 20): Promise<TeamResponse[]> {
         this.log.info('TeamService:find', { skip, take });
-        const teams: Team[] = await this.teamRepository.find({ skip, take });
+        const teams: Team[] = await this.teamRepository.find({
+            where: {
+                isBlocked: false,
+            },
+            skip,
+            take,
+        });
         return plainToClass<TeamResponse, Team>(
             TeamResponse,
             teams,
@@ -29,7 +35,11 @@ export class TeamService {
 
     public async getTeamById(id: number): Promise<TeamResponse | undefined> {
         this.log.info('TeamService:getTeamById', { TeamId: id });
-        const team = await this.teamRepository.findOne({ id });
+        const team = await this.teamRepository.findOne(id, {
+            where: {
+                isBlocked: false,
+            },
+        });
         return plainToClass<TeamResponse, Team>(
             TeamResponse,
             team,
@@ -77,6 +87,9 @@ export class TeamService {
         const team = await this.teamRepository.findOne(teamId);
         if (!team) {
             return undefined;
+        }
+        if (body.statusSecondPitch && body.statusSecondPitch === StatusTeam.NOT_PRESENT) {
+            await this.teamRepository.update(team.id, { isBlocked: true });
         }
         body.id = team.id;
         const savedTeam = await this.teamRepository.save(body);

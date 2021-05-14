@@ -1,6 +1,6 @@
 import { IsEnum, IsOptional, IsString } from 'class-validator';
 
-import { StatusTeam } from '../../models/Referee';
+import { RoleReferee } from '../../models/Referee';
 
 export class UpdationRefereeRequest {
 
@@ -12,7 +12,7 @@ export class UpdationRefereeRequest {
     public surname: string;
 
     @IsOptional()
-    @IsEnum(StatusTeam)
+    @IsEnum(RoleReferee)
     public type: string;
 
     @IsOptional()

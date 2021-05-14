@@ -24,7 +24,6 @@ export function authorizationChecker(connection: Connection): (action: Action, r
         }
 
         action.request.user = user;
-
         if (action.request.user === undefined) {
             log.warn('authorizationChecker:innerAuthorizationChecker:warning', { message: 'Invalid credentials given' });
             return false;

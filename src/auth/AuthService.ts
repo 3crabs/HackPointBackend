@@ -48,6 +48,10 @@ export class AuthService {
     }
 
     public async getAdminByAccessCookie(req: express.Request & IncomingMessage): Promise<any> {
+
+        if (!req.headers.cookie) {
+            return undefined;
+        }
         const authorization = req.headers.cookie.split('=')[1];
 
         if (authorization) {

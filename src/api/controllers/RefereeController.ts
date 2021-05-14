@@ -151,8 +151,11 @@ export class RefereeController {
     @ResponseSchema(ErrorResponse, { description: 'Access denied.', statusCode: '403' })
     public async checkCookie(
         @AccessCookie() cookie: string
-    ): Promise<{ cookie: string }> {
-        return { cookie };
+    ): Promise<boolean> {
+        if (!cookie) {
+            return false;
+        }
+        return true;
     }
 
 }

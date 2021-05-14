@@ -1,6 +1,6 @@
 import { BeforeInsert, Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
-export enum StatusTeam {
+export enum RoleReferee {
     REGULAR = 'regular',
     MAIN = 'main',
 }
