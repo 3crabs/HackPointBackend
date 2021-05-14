@@ -13,6 +13,7 @@ export class ErrorHandlerMiddleware implements ExpressErrorMiddlewareInterface {
         @Logger(__filename) private log: LoggerInterface
     ) { }
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     public error(error: HttpError, req: express.Request, res: express.Response, next: express.NextFunction): void {
         res.status(error.httpCode || 500);
         res.json({

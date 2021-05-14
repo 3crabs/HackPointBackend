@@ -1,10 +1,9 @@
 import { Action } from 'routing-controllers';
 import { Connection } from 'typeorm';
 
-import { User } from '../api/models/User';
-
-export function currentUserChecker(connection: Connection): (action: Action) => Promise<User | undefined> {
-    return async function innerCurrentUserChecker(action: Action): Promise<User | undefined> {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export function currentUserChecker(connection: Connection): (action: Action) => Promise<any> {
+    return async function innerCurrentUserChecker(action: Action): Promise<any> {
         return action.request.user;
     };
 }
