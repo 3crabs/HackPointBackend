@@ -292,4 +292,16 @@ export class RefereeController {
         return this.refereeService.getRoles(referee.id);
     }
 
+    @Authorized(['referee'])
+    @Post('/admin/referee/pitch/final')
+    @OpenAPI({
+        summary: 'final', security: [{ CookieAuth: [] }],
+    })
+    @ResponseSchema(SuccessResponse)
+    @ResponseSchema(ErrorResponse, { description: 'Unauthorized', statusCode: '401' })
+    @ResponseSchema(ErrorResponse, { description: 'Access denied', statusCode: '403' })
+    public final(): Promise<number> {
+        return this.refereeService.end();
+    }
+
 }

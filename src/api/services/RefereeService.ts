@@ -271,4 +271,9 @@ export class RefereeService {
         return roles;
     }
 
+    public async end(): Promise<number> {
+        this.log.info('RefereeService:getRoles', { });
+        return 0;
+    }
+
 }
