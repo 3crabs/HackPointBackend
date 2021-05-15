@@ -1,5 +1,6 @@
 import { BeforeInsert, Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 
+import { Note } from './Note';
 import { Point } from './Point';
 
 export enum RoleReferee {
@@ -33,6 +34,9 @@ export class Referee {
 
     @OneToMany(() => Point, point => point.referee)
     public points: Point[];
+
+    @OneToMany(() => Note, note => note.referee)
+    public notes: Note[];
 
     @BeforeInsert()
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment

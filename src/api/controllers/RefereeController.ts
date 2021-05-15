@@ -8,15 +8,18 @@ import { OpenAPI, ResponseSchema } from 'routing-controllers-openapi';
 
 import { AccessCookie } from '../../decorators/AccessCookie';
 import { env } from '../../env';
+import { NoteNotFoundError } from '../errors/NoteNotFoundError';
 import { PointNotFoundError } from '../errors/PointNotFoundError';
 import { RefereeNotFoundError } from '../errors/RefereeNotFoundError';
 import { Referee } from '../models/Referee';
 import { RefereeService } from '../services/RefereeService';
 import { CreationRefereeRequest } from './requests/CreationRefereeRequest';
 import { RefereeLoginRequest } from './requests/RefereeLoginRequest';
+import { UpdationNoteRequest } from './requests/UpdationNoteRequest';
 import { UpdationPointRequest } from './requests/UpdationPointRequest';
 import { UpdationRefereeRequest } from './requests/UpdationRefereeRequest';
 import { ErrorResponse } from './responses/ErrorResponse';
+import { NoteResponse } from './responses/NoteResponse';
 import { PointResponse } from './responses/PointResponse';
 import { RefereeResponse } from './responses/RefereeResponse';
 import { SuccessResponse } from './responses/SuccessResponse';
@@ -194,7 +197,7 @@ export class RefereeController {
     @Put('/referee/point/:id')
     @OnUndefined(PointNotFoundError)
     @OpenAPI({
-        summary: 'update point', security: [{ CookieAuth: [] }],
+        summary: 'update point', security: [{ CookieAuth: [] }], tags: ['Point'],
     })
     @ResponseSchema(SuccessResponse)
     @ResponseSchema(ErrorResponse, { description: 'BadRequest', statusCode: '400' })
@@ -211,7 +214,7 @@ export class RefereeController {
     @Get('/referee/point')
     @OnUndefined(PointNotFoundError)
     @OpenAPI({
-        summary: 'update point', security: [{ CookieAuth: [] }],
+        summary: 'get points', security: [{ CookieAuth: [] }], tags: ['Point'],
     })
     @ResponseSchema(PointResponse, { isArray: true })
     @ResponseSchema(ErrorResponse, { description: 'Unauthorized', statusCode: '401' })
@@ -220,6 +223,38 @@ export class RefereeController {
         @CurrentUser() referee: Referee
     ): Promise<PointResponse[]> {
         return this.refereeService.getPoints(referee);
+    }
+
+    @Authorized(['referee'])
+    @Put('/referee/note/:id')
+    @OnUndefined(NoteNotFoundError)
+    @OpenAPI({
+        summary: 'update note', security: [{ CookieAuth: [] }], tags: ['Note'],
+    })
+    @ResponseSchema(SuccessResponse)
+    @ResponseSchema(ErrorResponse, { description: 'BadRequest', statusCode: '400' })
+    @ResponseSchema(ErrorResponse, { description: 'Unauthorized', statusCode: '401' })
+    @ResponseSchema(ErrorResponse, { description: 'Access denied', statusCode: '403' })
+    @ResponseSchema(ErrorResponse, { description: 'Note not found', statusCode: '404' })
+    public updateNote(
+        @Param('id') pointId: number, @Body({ required: true, validate: true }) body: UpdationNoteRequest, @CurrentUser() referee: Referee
+    ): Promise<SuccessResponse> {
+        return this.refereeService.updateNote(pointId, body, referee);
+    }
+
+    @Authorized(['referee'])
+    @Get('/referee/note')
+    @OnUndefined(NoteNotFoundError)
+    @OpenAPI({
+        summary: 'get notes', security: [{ CookieAuth: [] }], tags: ['Note'],
+    })
+    @ResponseSchema(NoteResponse, { isArray: true })
+    @ResponseSchema(ErrorResponse, { description: 'Unauthorized', statusCode: '401' })
+    @ResponseSchema(ErrorResponse, { description: 'Access denied', statusCode: '403' })
+    public getNotes(
+        @CurrentUser() referee: Referee
+    ): Promise<NoteResponse[]> {
+        return this.refereeService.getNotes(referee);
     }
 
 }

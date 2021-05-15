@@ -8,17 +8,21 @@ import { OrmRepository } from 'typeorm-typedi-extensions';
 import { Logger, LoggerInterface } from '../../decorators/Logger';
 import { env } from '../../env';
 import { CreationRefereeRequest } from '../controllers/requests/CreationRefereeRequest';
+import { UpdationNoteRequest } from '../controllers/requests/UpdationNoteRequest';
 import { UpdationPointRequest } from '../controllers/requests/UpdationPointRequest';
 import { UpdationRefereeRequest } from '../controllers/requests/UpdationRefereeRequest';
+import { NoteResponse } from '../controllers/responses/NoteResponse';
 import { PointResponse } from '../controllers/responses/PointResponse';
 import { RefereeResponse } from '../controllers/responses/RefereeResponse';
 import { SuccessResponse } from '../controllers/responses/SuccessResponse';
 import { AccessDeniedError } from '../errors/AccessDeniedError';
 import { Criterion } from '../models/Criterion';
+import { Note } from '../models/Note';
 import { Point } from '../models/Point';
 import { Referee } from '../models/Referee';
 import { StatusTeam, Team } from '../models/Team';
 import { CriterionRepository } from '../repositories/CriterionRepository';
+import { NoteRepository } from '../repositories/NoteRepository';
 import { PointRepository } from '../repositories/PointRepository';
 import { RefereeRepository } from '../repositories/RefereeRepository';
 import { TeamRepository } from '../repositories/TeamRepository';
@@ -31,6 +35,7 @@ export class RefereeService {
         @OrmRepository() private teamRepository: TeamRepository,
         @OrmRepository() private pointRepository: PointRepository,
         @OrmRepository() private criterionRepository: CriterionRepository,
+        @OrmRepository() private noteRepository: NoteRepository,
         @Logger(__filename) private log: LoggerInterface
     ) { }
 
@@ -148,6 +153,10 @@ export class RefereeService {
                 newPoint.criterionId = criterion.id;
                 newPoint.point = 0;
                 await this.pointRepository.save(newPoint);
+                const newNote: Note = new Note();
+                newNote.refereeId = referee.id;
+                newNote.criterionId = criterion.id;
+                await this.noteRepository.save(newNote);
             }
         }
         return { status: 'OK', message: 'Started final pitch' };
@@ -178,6 +187,35 @@ export class RefereeService {
         return plainToClass<PointResponse, Point>(
             PointResponse,
             points,
+            { excludeExtraneousValues: true }
+        );
+    }
+
+    public async updateNote(noteId: number, body: UpdationNoteRequest, currentReferee: Referee): Promise<SuccessResponse> {
+        this.log.info('RefereeService:updateNote', { noteId, body });
+        const note: Note = await this.noteRepository.findOne(noteId);
+        if (!note) {
+            return undefined;
+        }
+        if (note.refereeId !== currentReferee.id) {
+            throw new AccessDeniedError();
+        }
+        note.text = body.text;
+        await this.noteRepository.save(note);
+        return { status: 'OK', message: 'Saved note' };
+    }
+
+    public async getNotes(currentReferee: Referee): Promise<NoteResponse[]> {
+        this.log.info('RefereeService:getNotes', { refereeId: currentReferee.id });
+        const notes: Note[] = await this.noteRepository.find({
+            where: {
+                refereeId: currentReferee.id,
+            },
+            relations: ['criterion', 'referee'],
+        });
+        return plainToClass<NoteResponse, Note>(
+            NoteResponse,
+            notes,
             { excludeExtraneousValues: true }
         );
     }
