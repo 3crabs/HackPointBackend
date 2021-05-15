@@ -22,6 +22,7 @@ export class CriterionService {
         const criterions: Criterion[] = await this.criterionRepository.find({
             skip,
             take,
+            order: { priority: 'ASC' },
         });
         return plainToClass<CriterionResponse, Criterion>(
             CriterionResponse,
