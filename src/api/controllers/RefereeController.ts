@@ -117,13 +117,17 @@ export class RefereeController {
         @Body({ validate: { whitelist: true } }) refereeData: RefereeLoginRequest, @Res() res: express.Response
     ): Promise<{ status: string }> {
         const authToken: string = await this.refereeService.loginReferee(
-            refereeData.login, crypto.createHash('md5').update(refereeData.password).digest('hex')
+            refereeData.login, crypto.createHash('md5').update(refereeData.password).digest('hex'), refereeData.isMobile
         );
-        res.cookie('_auth', authToken, {
-            httpOnly: env.app.cookie.httpOnly,
-            secure: env.app.cookie.secure,
-            sameSite: env.app.cookie.sameSite,
-        });
+        if (refereeData.isMobile && authToken) {
+            res.header('Access-Token', authToken);
+        } else {
+            res.cookie('_auth', authToken, {
+                httpOnly: env.app.cookie.httpOnly,
+                secure: env.app.cookie.secure,
+                sameSite: env.app.cookie.sameSite,
+            });
+        }
 
         return { status: 'OK' };
     }

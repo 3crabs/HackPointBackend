@@ -49,14 +49,28 @@ export class AuthService {
 
     public async getAdminByAccessCookie(req: express.Request & IncomingMessage): Promise<any> {
 
+        const redisClient = (global as any).frameworkSettings.getData('redis_client');
         if (!req.headers.cookie) {
-            return undefined;
+            const authorizationToken: string = req.headers.authorization;
+            if (authorizationToken && authorizationToken.split(' ')[0] === 'Bearer') {
+                const accessToken: string = authorizationToken.split(' ')[1];
+                if (!accessToken) {
+                    this.log.warn('AuthService:getAdminByAccessCookie', { message: 'Token not found.' });
+                    return undefined;
+                }
+                const refereeId = await redisClient.getAsync(accessToken);
+                const referee = await this.refereeRepository.findOne(refereeId);
+                if (!referee) {
+                    this.log.warn('AuthService:getAdminByAccessCookie', { message: 'This user was deleted by system', referee });
+                    return undefined;
+                }
+                return referee;
+            }
         }
         const authorization = req.headers.cookie.split('=')[1];
 
         if (authorization) {
             this.log.info('AuthService:getAdminByAccessCookie', { message: 'Admin credentials provided by the client' });
-            const redisClient = (global as any).frameworkSettings.getData('redis_client');
             if (await redisClient.getAsync(authorization) === null) {
                 return undefined;
             }
