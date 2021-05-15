@@ -20,9 +20,6 @@ export class TeamService {
     public async getTeams(skip: number = 0, take: number = 20): Promise<TeamResponse[]> {
         this.log.info('TeamService:find', { skip, take });
         const teams: Team[] = await this.teamRepository.find({
-            where: {
-                isBlocked: false,
-            },
             skip,
             take,
         });
@@ -35,11 +32,7 @@ export class TeamService {
 
     public async getTeamById(id: number): Promise<TeamResponse | undefined> {
         this.log.info('TeamService:getTeamById', { TeamId: id });
-        const team = await this.teamRepository.findOne(id, {
-            where: {
-                isBlocked: false,
-            },
-        });
+        const team = await this.teamRepository.findOne(id);
         return plainToClass<TeamResponse, Team>(
             TeamResponse,
             team,

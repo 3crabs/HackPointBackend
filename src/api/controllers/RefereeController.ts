@@ -1,18 +1,23 @@
 import crypto from 'crypto';
 import * as express from 'express';
 import {
-    Authorized, Body, Delete, Get, JsonController, OnUndefined, Param, Post, Put, QueryParam, Res
+    Authorized, Body, CurrentUser, Delete, Get, JsonController, OnUndefined, Param, Post, Put,
+    QueryParam, Res
 } from 'routing-controllers';
 import { OpenAPI, ResponseSchema } from 'routing-controllers-openapi';
 
 import { AccessCookie } from '../../decorators/AccessCookie';
 import { env } from '../../env';
+import { PointNotFoundError } from '../errors/PointNotFoundError';
 import { RefereeNotFoundError } from '../errors/RefereeNotFoundError';
+import { Referee } from '../models/Referee';
 import { RefereeService } from '../services/RefereeService';
 import { CreationRefereeRequest } from './requests/CreationRefereeRequest';
 import { RefereeLoginRequest } from './requests/RefereeLoginRequest';
+import { UpdationPointRequest } from './requests/UpdationPointRequest';
 import { UpdationRefereeRequest } from './requests/UpdationRefereeRequest';
 import { ErrorResponse } from './responses/ErrorResponse';
+import { PointResponse } from './responses/PointResponse';
 import { RefereeResponse } from './responses/RefereeResponse';
 import { SuccessResponse } from './responses/SuccessResponse';
 
@@ -97,7 +102,7 @@ export class RefereeController {
 
     @Post('/login')
     @OpenAPI({
-        tags: ['Referee'], summary: 'login referee',
+        tags: ['Auth'], summary: 'login referee',
         responses: { 200: { headers: { 'Set-Cookie': { schema: {
             type: 'string', example: '_auth=abcdefghijklmnopqrstuvwxyz;Path=/;HttpOnly;SameSite=Strict;Secure' }, description: 'JWT access token in cookie' } },
         } },
@@ -123,7 +128,7 @@ export class RefereeController {
     @Authorized(['referee'])
     @Post('/logout')
     @OpenAPI({
-        tags: ['Referee'], summary: 'logout referee', security: [{ CookieAuth: [] }],
+        tags: ['Auth'], summary: 'logout referee', security: [{ CookieAuth: [] }],
         responses: { 200: { headers: { 'Set-Cookie': { schema: {
             type: 'string', example: '_auth=;Path=/;HttpOnly;SameSite=Strict;Secure' }, description: 'Empty JWT access token in cookie' } },
         } },
@@ -146,6 +151,9 @@ export class RefereeController {
     }
 
     @Post('/login/check')
+    @OpenAPI({
+        tags: ['Auth'], summary: 'check cookie', security: [{ CookieAuth: [] }],
+    })
     @ResponseSchema(SuccessResponse, { description: 'OK. Login' })
     @ResponseSchema(ErrorResponse, { description: 'Login or password not correct.', statusCode: '400' })
     @ResponseSchema(ErrorResponse, { description: 'Access denied.', statusCode: '403' })
@@ -156,6 +164,62 @@ export class RefereeController {
             return false;
         }
         return true;
+    }
+
+    @Authorized(['referee'])
+    @Post('/admin/referee/checkpoint')
+    @OpenAPI({
+        summary: 'end second pitch', security: [{ CookieAuth: [] }],
+    })
+    @ResponseSchema(SuccessResponse)
+    @ResponseSchema(ErrorResponse, { description: 'Unauthorized', statusCode: '401' })
+    @ResponseSchema(ErrorResponse, { description: 'Access denied', statusCode: '403' })
+    public endSecondPitch(): Promise<SuccessResponse> {
+        return this.refereeService.endSecondPitch();
+    }
+
+    @Authorized(['referee'])
+    @Post('/admin/referee/demofest')
+    @OpenAPI({
+        summary: 'start final round', security: [{ CookieAuth: [] }],
+    })
+    @ResponseSchema(SuccessResponse)
+    @ResponseSchema(ErrorResponse, { description: 'Unauthorized', statusCode: '401' })
+    @ResponseSchema(ErrorResponse, { description: 'Access denied', statusCode: '403' })
+    public startFinalPitch(): Promise<SuccessResponse> {
+        return this.refereeService.startFinalPitch();
+    }
+
+    @Authorized(['referee'])
+    @Put('/referee/point/:id')
+    @OnUndefined(PointNotFoundError)
+    @OpenAPI({
+        summary: 'update point', security: [{ CookieAuth: [] }],
+    })
+    @ResponseSchema(SuccessResponse)
+    @ResponseSchema(ErrorResponse, { description: 'BadRequest', statusCode: '400' })
+    @ResponseSchema(ErrorResponse, { description: 'Unauthorized', statusCode: '401' })
+    @ResponseSchema(ErrorResponse, { description: 'Access denied', statusCode: '403' })
+    @ResponseSchema(ErrorResponse, { description: 'Point not found', statusCode: '404' })
+    public updatePoint(
+        @Param('id') pointId: number, @Body({ required: true, validate: true }) body: UpdationPointRequest, @CurrentUser() referee: Referee
+    ): Promise<SuccessResponse> {
+        return this.refereeService.updatePoint(pointId, body, referee);
+    }
+
+    @Authorized(['referee'])
+    @Get('/referee/point')
+    @OnUndefined(PointNotFoundError)
+    @OpenAPI({
+        summary: 'update point', security: [{ CookieAuth: [] }],
+    })
+    @ResponseSchema(PointResponse, { isArray: true })
+    @ResponseSchema(ErrorResponse, { description: 'Unauthorized', statusCode: '401' })
+    @ResponseSchema(ErrorResponse, { description: 'Access denied', statusCode: '403' })
+    public getPoints(
+        @CurrentUser() referee: Referee
+    ): Promise<PointResponse[]> {
+        return this.refereeService.getPoints(referee);
     }
 
 }

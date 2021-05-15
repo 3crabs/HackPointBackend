@@ -1,4 +1,6 @@
-import { BeforeInsert, Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { BeforeInsert, Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+
+import { Point } from './Point';
 
 export enum RoleReferee {
     REGULAR = 'regular',
@@ -28,6 +30,9 @@ export class Referee {
 
     @Column()
     public createdAt: number;
+
+    @OneToMany(() => Point, point => point.referee)
+    public points: Point[];
 
     @BeforeInsert()
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment

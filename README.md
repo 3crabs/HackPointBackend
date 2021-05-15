@@ -1,1 +1,1 @@
-TypeGraphQl, hasura, express boilerplate
+3CRABS for hackathon 2021

@@ -1,7 +1,7 @@
 {
-  "name": "boilerplate",
+  "name": "hackpoint",
   "version": "0.0.1",
-  "description": "A delightful way to building a Node.js RESTful API Services with beautiful code written in TypeScript",
+  "description": "Node.js RESTful API Services with beautiful code written in TypeScript",
   "main": "src/app.ts",
   "scripts": {
     "start": "nps",

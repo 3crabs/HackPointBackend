@@ -2,21 +2,35 @@ import { plainToClass } from 'class-transformer';
 import crypto from 'crypto';
 import * as jwt from 'jsonwebtoken';
 import { Service } from 'typedi';
+import { Not } from 'typeorm';
 import { OrmRepository } from 'typeorm-typedi-extensions';
 
 import { Logger, LoggerInterface } from '../../decorators/Logger';
 import { env } from '../../env';
 import { CreationRefereeRequest } from '../controllers/requests/CreationRefereeRequest';
+import { UpdationPointRequest } from '../controllers/requests/UpdationPointRequest';
 import { UpdationRefereeRequest } from '../controllers/requests/UpdationRefereeRequest';
+import { PointResponse } from '../controllers/responses/PointResponse';
 import { RefereeResponse } from '../controllers/responses/RefereeResponse';
+import { SuccessResponse } from '../controllers/responses/SuccessResponse';
+import { AccessDeniedError } from '../errors/AccessDeniedError';
+import { Criterion } from '../models/Criterion';
+import { Point } from '../models/Point';
 import { Referee } from '../models/Referee';
+import { StatusTeam, Team } from '../models/Team';
+import { CriterionRepository } from '../repositories/CriterionRepository';
+import { PointRepository } from '../repositories/PointRepository';
 import { RefereeRepository } from '../repositories/RefereeRepository';
+import { TeamRepository } from '../repositories/TeamRepository';
 
 @Service()
 export class RefereeService {
 
     public constructor(
         @OrmRepository() private refereeRepository: RefereeRepository,
+        @OrmRepository() private teamRepository: TeamRepository,
+        @OrmRepository() private pointRepository: PointRepository,
+        @OrmRepository() private criterionRepository: CriterionRepository,
         @Logger(__filename) private log: LoggerInterface
     ) { }
 
@@ -105,6 +119,67 @@ export class RefereeService {
         if (cookie) {
             await redisClient.delAsync(cookie);
         }
+    }
+
+    public async endSecondPitch(): Promise<SuccessResponse> {
+        this.log.info('RefereeService:endSecondPitch');
+        const teams: Team[] = await this.teamRepository.find({
+            where: [
+                { statusFirstPitch: Not(StatusTeam.PRESENT) },
+                { statusSecondPitch: Not(StatusTeam.PRESENT) },
+            ],
+        });
+        for (const team of teams) {
+            await this.teamRepository.update(team.id, { isBlocked: true });
+        }
+        return { status: 'OK', message: 'End checkpoint' };
+    }
+
+    public async startFinalPitch(): Promise<SuccessResponse> {
+        this.log.info('RefereeService:startFinalPitch');
+        const points: Point[] = await this.pointRepository.find();
+        await this.pointRepository.delete(points.map(point => point.id));
+        const criterions: Criterion[] = await this.criterionRepository.find();
+        const referees: Referee[] = await this.refereeRepository.find();
+        for (const referee of referees) {
+            for (const criterion of criterions) {
+                const newPoint = new Point();
+                newPoint.refereeId = referee.id;
+                newPoint.criterionId = criterion.id;
+                newPoint.point = 0;
+                await this.pointRepository.save(newPoint);
+            }
+        }
+        return { status: 'OK', message: 'Started final pitch' };
+    }
+
+    public async updatePoint(pointId: number, body: UpdationPointRequest, currentReferee: Referee): Promise<SuccessResponse> {
+        this.log.info('RefereeService:updatePoint', { pointId, body });
+        const point: Point = await this.pointRepository.findOne(pointId);
+        if (!point) {
+            return undefined;
+        }
+        if (point.refereeId !== currentReferee.id) {
+            throw new AccessDeniedError();
+        }
+        point.point = body.point;
+        await this.pointRepository.save(point);
+        return { status: 'OK', message: 'Saved point' };
+    }
+
+    public async getPoints(currentReferee: Referee): Promise<PointResponse[]> {
+        this.log.info('RefereeService:getPoints', { refereeId: currentReferee.id });
+        const points: Point[] = await this.pointRepository.find({
+            where: {
+                refereeId: currentReferee.id,
+            },
+            relations: ['criterion', 'referee'],
+        });
+        return plainToClass<PointResponse, Point>(
+            PointResponse,
+            points,
+            { excludeExtraneousValues: true }
+        );
     }
 
 }

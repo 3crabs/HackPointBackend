@@ -1,4 +1,6 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+
+import { Point } from './Point';
 
 @Entity()
 export class Criterion {
@@ -15,4 +17,6 @@ export class Criterion {
     @Column()
     public priority: number;
 
+    @OneToMany(() => Point, point => point.referee)
+    public points: Point[];
 }
