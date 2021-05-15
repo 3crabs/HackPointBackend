@@ -20,7 +20,7 @@ import { AccessDeniedError } from '../errors/AccessDeniedError';
 import { Criterion } from '../models/Criterion';
 import { Note } from '../models/Note';
 import { Point } from '../models/Point';
-import { Referee } from '../models/Referee';
+import { Referee, RoleReferee } from '../models/Referee';
 import { StatusTeam, Team } from '../models/Team';
 import { CriterionRepository } from '../repositories/CriterionRepository';
 import { NoteRepository } from '../repositories/NoteRepository';
@@ -267,7 +267,7 @@ export class RefereeService {
 
     public async getRoles(refereeId: number): Promise<string[]> {
         this.log.info('RefereeService:getRoles', { refereeId });
-        const roles = Object.values(StatusTeam);
+        const roles = Object.values(RoleReferee);
         return roles;
     }
 
