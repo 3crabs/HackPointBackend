@@ -17,7 +17,6 @@ import { PointResponse } from '../controllers/responses/PointResponse';
 import { RefereeResponse } from '../controllers/responses/RefereeResponse';
 import { SuccessResponse } from '../controllers/responses/SuccessResponse';
 import { AccessDeniedError } from '../errors/AccessDeniedError';
-import { TeamNotFoundError } from '../errors/TeamNotFoundError';
 import { Criterion } from '../models/Criterion';
 import { Note } from '../models/Note';
 import { Point } from '../models/Point';
@@ -190,12 +189,7 @@ export class RefereeService {
         if (point.refereeId !== currentReferee.id) {
             throw new AccessDeniedError();
         }
-        const team: Team = await this.teamRepository.findOne(body.teamId);
-        if (!team) {
-            throw new TeamNotFoundError();
-        }
         point.point = body.point;
-        point.teamId = body.teamId;
         await this.pointRepository.save(point);
         return { status: 'OK', message: 'Saved point' };
     }
@@ -244,7 +238,7 @@ export class RefereeService {
         );
     }
 
-    public async getPoint(currentReferee: Referee, teamId: number): Promise<{ points: PointResponse[]; note: NoteResponse }> {
+    public async getPointsAndNote(currentReferee: Referee, teamId: number): Promise<{ points: PointResponse[]; note: NoteResponse }> {
         this.log.info('RefereeService:getPoint', { refereeId: currentReferee.id });
         const points: Point[] = await this.pointRepository.find({
             where: {
@@ -269,6 +263,12 @@ export class RefereeService {
             { excludeExtraneousValues: true }
         );
         return { points: pointsResponse, note: noteResponse };
+    }
+
+    public async getRoles(refereeId: number): Promise<string[]> {
+        this.log.info('RefereeService:getRoles', { refereeId });
+        const roles = Object.values(StatusTeam);
+        return roles;
     }
 
 }

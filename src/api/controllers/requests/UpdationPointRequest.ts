@@ -7,6 +7,4 @@ export class UpdationPointRequest {
     @Max(10)
     public point: number;
 
-    @IsInt()
-    public teamId: number;
 }

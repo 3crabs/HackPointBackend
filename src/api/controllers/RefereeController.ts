@@ -268,15 +268,28 @@ export class RefereeController {
     @Get('/referee/point/note')
     @OnUndefined(NoteNotFoundError)
     @OpenAPI({
-        summary: 'get notes', security: [{ CookieAuth: [] }], tags: ['Note'],
+        summary: 'get notes', security: [{ CookieAuth: [] }], tags: ['Point'],
     })
     @ResponseSchema(PointResponse, { isArray: true })
     @ResponseSchema(ErrorResponse, { description: 'Unauthorized', statusCode: '401' })
     @ResponseSchema(ErrorResponse, { description: 'Access denied', statusCode: '403' })
-    public getPoint(
+    public getPointsAndNote(
         @CurrentUser() referee: Referee, @QueryParam('teamId', { required: true }) teamId: number
     ): Promise<{ points: PointResponse[]; note: NoteResponse }> {
-        return this.refereeService.getPoint(referee, teamId);
+        return this.refereeService.getPointsAndNote(referee, teamId);
+    }
+
+    @Authorized(['referee'])
+    @Get('/admin/referees/role')
+    @OpenAPI({
+        summary: 'get notes', security: [{ CookieAuth: [] }], tags: ['Referee'],
+    })
+    @ResponseSchema(ErrorResponse, { description: 'Unauthorized', statusCode: '401' })
+    @ResponseSchema(ErrorResponse, { description: 'Access denied', statusCode: '403' })
+    public getRoles(
+        @CurrentUser() referee: Referee
+    ): Promise<string[]> {
+        return this.refereeService.getRoles(referee.id);
     }
 
 }
