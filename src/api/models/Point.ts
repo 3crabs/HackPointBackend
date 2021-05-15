@@ -2,6 +2,7 @@ import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 't
 
 import { Criterion } from './Criterion';
 import { Referee } from './Referee';
+import { Team } from './Team';
 
 @Entity()
 export class Point {
@@ -17,6 +18,13 @@ export class Point {
 
     @Column()
     public criterionId: number;
+
+    @Column()
+    public teamId: number;
+
+    @ManyToOne(() => Team, team => team.points)
+    @JoinColumn()
+    public team: Team;
 
     @ManyToOne(() => Referee, referee => referee.points)
     @JoinColumn()

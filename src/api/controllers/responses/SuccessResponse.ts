@@ -1,5 +1,8 @@
-import { IsString } from 'class-validator';
+import { Type } from 'class-transformer';
+import { IsObject, IsString, ValidateNested } from 'class-validator';
 import { JSONSchema } from 'class-validator-jsonschema';
+
+import { RefereeResponse } from './RefereeResponse';
 
 export class SuccessResponse {
 
@@ -13,4 +16,9 @@ export class SuccessResponse {
 
     @IsString()
     public token?: string;
+
+    @ValidateNested({ each: true })
+    @Type(() => RefereeResponse)
+    @IsObject()
+    public referee?: RefereeResponse;
 }

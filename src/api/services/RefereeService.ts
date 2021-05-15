@@ -17,6 +17,7 @@ import { PointResponse } from '../controllers/responses/PointResponse';
 import { RefereeResponse } from '../controllers/responses/RefereeResponse';
 import { SuccessResponse } from '../controllers/responses/SuccessResponse';
 import { AccessDeniedError } from '../errors/AccessDeniedError';
+import { TeamNotFoundError } from '../errors/TeamNotFoundError';
 import { Criterion } from '../models/Criterion';
 import { Note } from '../models/Note';
 import { Point } from '../models/Point';
@@ -105,7 +106,7 @@ export class RefereeService {
         );
     }
 
-    public async loginReferee(login: string, password: string, isMobile: boolean = false): Promise<string> {
+    public async loginReferee(login: string, password: string, isMobile: boolean = false): Promise<{ token: string; referee: Referee }> {
         this.log.info('RefereeService:loginReferee', { login });
         const referee: Referee = await this.refereeRepository.findOne({
             where: {
@@ -117,12 +118,12 @@ export class RefereeService {
             const token: string = uuid();
             const redisClient = (global as any).frameworkSettings.getData('redis_client');
             await redisClient.setAsync(token, referee.id);
-            return token;
+            return  { token, referee };
         } else {
             const token: string = jwt.sign({ refereeId: referee.id, login: referee.login }, env.app.jwtSecret);
             const redisClient = (global as any).frameworkSettings.getData('redis_client');
             await redisClient.setAsync(token, JSON.stringify({ refereeId: referee.id, login: referee.login, role: referee.type }));
-            return token;
+            return { token, referee };
         }
     }
 
@@ -179,7 +180,12 @@ export class RefereeService {
         if (point.refereeId !== currentReferee.id) {
             throw new AccessDeniedError();
         }
+        const team: Team = await this.teamRepository.findOne(body.teamId);
+        if (!team) {
+            throw new TeamNotFoundError();
+        }
         point.point = body.point;
+        point.teamId = body.teamId;
         await this.pointRepository.save(point);
         return { status: 'OK', message: 'Saved point' };
     }
@@ -209,6 +215,7 @@ export class RefereeService {
             throw new AccessDeniedError();
         }
         note.text = body.text;
+        note.teamId = body.teamId;
         await this.noteRepository.save(note);
         return { status: 'OK', message: 'Saved note' };
     }

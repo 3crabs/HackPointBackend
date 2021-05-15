@@ -116,23 +116,22 @@ export class RefereeController {
     public async login(
         @Body({ validate: { whitelist: true } }) refereeData: RefereeLoginRequest, @Res() res: express.Response
     ): Promise<SuccessResponse> {
-        const authToken: string = await this.refereeService.loginReferee(
+        const credentials = await this.refereeService.loginReferee(
             refereeData.login, crypto.createHash('md5').update(refereeData.password).digest('hex'), refereeData.isMobile
         );
         const successResponse = new SuccessResponse();
         successResponse.status = 'OK';
-        if (refereeData.isMobile && authToken) {
-            res.header('Access-Token', authToken);
-            successResponse.token = authToken;
-
+        successResponse.referee = credentials.referee;
+        if (refereeData.isMobile && credentials.token) {
+            res.header('Access-Token', credentials.token);
+            successResponse.token = credentials.token;
         } else {
-            res.cookie('_auth', authToken, {
+            res.cookie('_auth', credentials.token, {
                 httpOnly: env.app.cookie.httpOnly,
                 secure: env.app.cookie.secure,
                 sameSite: env.app.cookie.sameSite,
             });
         }
-
         return successResponse;
     }
 
