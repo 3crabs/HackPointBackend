@@ -36,8 +36,8 @@ export class RefereeService {
         @OrmRepository() private refereeRepository: RefereeRepository,
         @OrmRepository() private teamRepository: TeamRepository,
         @OrmRepository() private pointRepository: PointRepository,
-        @OrmRepository() private criterionRepository: CriterionRepository,
         @OrmRepository() private noteRepository: NoteRepository,
+        @OrmRepository() private criterionRepository: CriterionRepository,
         @Logger(__filename) private log: LoggerInterface
     ) { }
 
@@ -152,19 +152,29 @@ export class RefereeService {
     public async startFinalPitch(): Promise<SuccessResponse> {
         this.log.info('RefereeService:startFinalPitch');
         const points: Point[] = await this.pointRepository.find();
-        await this.pointRepository.delete(points.map(point => point.id));
+        if (points.length !== 0) {
+            await this.pointRepository.delete(points.map(point => point.id));
+        }
+        const notes: Note[] = await this.noteRepository.find();
+        if (notes.length !== 0) {
+            await this.pointRepository.delete(notes.map(point => point.id));
+        }
         const criterions: Criterion[] = await this.criterionRepository.find();
         const referees: Referee[] = await this.refereeRepository.find();
+        const teams: Team[] = await this.teamRepository.find();
         for (const referee of referees) {
-            for (const criterion of criterions) {
-                const newPoint = new Point();
-                newPoint.refereeId = referee.id;
-                newPoint.criterionId = criterion.id;
-                newPoint.point = 0;
-                await this.pointRepository.save(newPoint);
+            for (const team of teams) {
+                for (const criterion of criterions) {
+                    const newPoint = new Point();
+                    newPoint.refereeId = referee.id;
+                    newPoint.point = 0;
+                    newPoint.teamId = team.id;
+                    newPoint.criterionId = criterion.id;
+                    await this.pointRepository.save(newPoint);
+                }
                 const newNote: Note = new Note();
                 newNote.refereeId = referee.id;
-                newNote.criterionId = criterion.id;
+                newNote.teamId = team.id;
                 await this.noteRepository.save(newNote);
             }
         }
@@ -215,7 +225,6 @@ export class RefereeService {
             throw new AccessDeniedError();
         }
         note.text = body.text;
-        note.teamId = body.teamId;
         await this.noteRepository.save(note);
         return { status: 'OK', message: 'Saved note' };
     }
@@ -226,13 +235,40 @@ export class RefereeService {
             where: {
                 refereeId: currentReferee.id,
             },
-            relations: ['criterion', 'referee'],
+            relations: ['referee'],
         });
         return plainToClass<NoteResponse, Note>(
             NoteResponse,
             notes,
             { excludeExtraneousValues: true }
         );
+    }
+
+    public async getPoint(currentReferee: Referee, teamId: number): Promise<{ points: PointResponse[]; note: NoteResponse }> {
+        this.log.info('RefereeService:getPoint', { refereeId: currentReferee.id });
+        const points: Point[] = await this.pointRepository.find({
+            where: {
+                refereeId: currentReferee.id,
+                teamId,
+            },
+            relations: ['criterion', 'referee'],
+        });
+        const note: Note = await this.noteRepository.findOne({
+            where: {
+                teamId,
+            },
+        });
+        const pointsResponse = plainToClass<PointResponse, Point>(
+            PointResponse,
+            points,
+            { excludeExtraneousValues: true }
+        );
+        const noteResponse = plainToClass<NoteResponse, Note>(
+            NoteResponse,
+            note,
+            { excludeExtraneousValues: true }
+        );
+        return { points: pointsResponse, note: noteResponse };
     }
 
 }

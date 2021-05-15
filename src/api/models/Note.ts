@@ -1,6 +1,5 @@
 import { Column, Entity, JoinColumn, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 
-import { Criterion } from './Criterion';
 import { Referee } from './Referee';
 import { Team } from './Team';
 
@@ -17,9 +16,6 @@ export class Note {
     public refereeId: number;
 
     @Column()
-    public criterionId: number;
-
-    @Column()
     public teamId: number;
 
     @ManyToOne(() => Team, team => team.points)
@@ -30,7 +26,4 @@ export class Note {
     @JoinColumn()
     public referee: Referee;
 
-    @ManyToOne(() => Criterion, criterion => criterion.notes)
-    @JoinColumn()
-    public criterion: Criterion;
 }

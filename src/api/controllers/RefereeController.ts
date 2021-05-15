@@ -264,4 +264,19 @@ export class RefereeController {
         return this.refereeService.getNotes(referee);
     }
 
+    @Authorized(['referee'])
+    @Get('/referee/point/note')
+    @OnUndefined(NoteNotFoundError)
+    @OpenAPI({
+        summary: 'get notes', security: [{ CookieAuth: [] }], tags: ['Note'],
+    })
+    @ResponseSchema(PointResponse, { isArray: true })
+    @ResponseSchema(ErrorResponse, { description: 'Unauthorized', statusCode: '401' })
+    @ResponseSchema(ErrorResponse, { description: 'Access denied', statusCode: '403' })
+    public getPoint(
+        @CurrentUser() referee: Referee, @QueryParam('teamId', { required: true }) teamId: number
+    ): Promise<{ points: PointResponse[]; note: NoteResponse }> {
+        return this.refereeService.getPoint(referee, teamId);
+    }
+
 }
