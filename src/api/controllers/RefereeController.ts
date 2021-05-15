@@ -115,12 +115,16 @@ export class RefereeController {
     @ResponseSchema(ErrorResponse, { description: 'Access denied.', statusCode: '403' })
     public async login(
         @Body({ validate: { whitelist: true } }) refereeData: RefereeLoginRequest, @Res() res: express.Response
-    ): Promise<{ status: string }> {
+    ): Promise<SuccessResponse> {
         const authToken: string = await this.refereeService.loginReferee(
             refereeData.login, crypto.createHash('md5').update(refereeData.password).digest('hex'), refereeData.isMobile
         );
+        const successResponse = new SuccessResponse();
+        successResponse.status = 'OK';
         if (refereeData.isMobile && authToken) {
             res.header('Access-Token', authToken);
+            successResponse.token = authToken;
+
         } else {
             res.cookie('_auth', authToken, {
                 httpOnly: env.app.cookie.httpOnly,
@@ -129,7 +133,7 @@ export class RefereeController {
             });
         }
 
-        return { status: 'OK' };
+        return successResponse;
     }
 
     @Authorized(['referee'])

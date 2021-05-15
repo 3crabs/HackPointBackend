@@ -10,4 +10,7 @@ export class SuccessResponse {
     @JSONSchema({ example: 'Success operation' })
     @IsString()
     public message: string;
+
+    @IsString()
+    public token?: string;
 }
