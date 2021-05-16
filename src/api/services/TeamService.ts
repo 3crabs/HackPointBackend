@@ -50,7 +50,6 @@ export class TeamService {
             const points = await this.pointRepository.find({
                 where: {
                     teamId: t.id,
-                    refereeId: referee.id,
                 },
                 relations: ['referee'],
             });
