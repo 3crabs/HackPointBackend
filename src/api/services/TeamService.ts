@@ -26,6 +26,7 @@ export class TeamService {
         const teams: Team[] = await this.teamRepository.find({
             skip,
             take,
+            order: { name: 'ASC' },
         });
         const teamResponse = plainToClass<TeamResponse, Team>(
             TeamResponse,
