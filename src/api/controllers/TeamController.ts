@@ -1,9 +1,11 @@
 import {
-    Authorized, Body, Delete, Get, JsonController, OnUndefined, Param, Post, Put, QueryParam
+    Authorized, Body, CurrentUser, Delete, Get, JsonController, OnUndefined, Param, Post, Put,
+    QueryParam
 } from 'routing-controllers';
 import { OpenAPI, ResponseSchema } from 'routing-controllers-openapi';
 
 import { TeamNotFoundError } from '../errors/TeamNotFoundError';
+import { Referee } from '../models/Referee';
 import { TeamService } from '../services/TeamService';
 import { CreationTeamRequest } from './requests/CreationTeamRequest';
 import { UpdationTeamRequest } from './requests/UpdationTeamRequest';
@@ -29,9 +31,9 @@ export class TeamController {
     @ResponseSchema(ErrorResponse, { description: 'Unauthorized', statusCode: '401' })
     @ResponseSchema(ErrorResponse, { description: 'Access denied', statusCode: '401' })
     public getTeams(
-        @QueryParam('skip') skip: number, @QueryParam('take') take: number
+        @QueryParam('skip') skip: number, @QueryParam('take') take: number, @CurrentUser() referee: Referee
     ): Promise<TeamResponse[]> {
-        return this.teamService.getTeams(skip, take);
+        return this.teamService.getTeams(skip, take, referee);
     }
 
     @Authorized(['referee'])

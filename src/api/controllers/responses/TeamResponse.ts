@@ -44,4 +44,7 @@ export class TeamResponse {
     @Expose()
     @IsNumber()
     public createdAt: number;
+
+    @IsInt()
+    public point: number;
 }

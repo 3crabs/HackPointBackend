@@ -6,7 +6,10 @@ import { Logger, LoggerInterface } from '../../decorators/Logger';
 import { CreationTeamRequest } from '../controllers/requests/CreationTeamRequest';
 import { UpdationTeamRequest } from '../controllers/requests/UpdationTeamRequest';
 import { TeamResponse } from '../controllers/responses/TeamResponse';
+import { Point } from '../models/Point';
+import { Referee } from '../models/Referee';
 import { StatusTeam, Team } from '../models/Team';
+import { PointRepository } from '../repositories/PointRepository';
 import { TeamRepository } from '../repositories/TeamRepository';
 
 @Service()
@@ -14,20 +17,35 @@ export class TeamService {
 
     public constructor(
         @OrmRepository() private teamRepository: TeamRepository,
+        @OrmRepository() private pointRepository: PointRepository,
         @Logger(__filename) private log: LoggerInterface
     ) { }
 
-    public async getTeams(skip: number = 0, take: number = 20): Promise<TeamResponse[]> {
+    public async getTeams(skip: number = 0, take: number = 20, referee: Referee): Promise<TeamResponse[]> {
         this.log.info('TeamService:find', { skip, take });
         const teams: Team[] = await this.teamRepository.find({
             skip,
             take,
         });
-        return plainToClass<TeamResponse, Team>(
+        const teamResponse = plainToClass<TeamResponse, Team>(
             TeamResponse,
             teams,
             { excludeExtraneousValues: true }
         );
+        for(const team of teamResponse) {
+            const points: Point[] = await this.pointRepository.find({
+                where: {
+                    teamId: team.id,
+                    refereeId: referee.id,
+                },
+            });
+            let amount = 0;
+            for (const point of points) {
+                amount += point.point;
+            }
+            team.point = amount;
+        }
+        return teamResponse;
     }
 
     public async getTeamById(id: number): Promise<TeamResponse | undefined> {
