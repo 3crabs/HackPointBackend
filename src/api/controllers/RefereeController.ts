@@ -300,8 +300,10 @@ export class RefereeController {
     @ResponseSchema(SuccessResponse)
     @ResponseSchema(ErrorResponse, { description: 'Unauthorized', statusCode: '401' })
     @ResponseSchema(ErrorResponse, { description: 'Access denied', statusCode: '403' })
-    public final(): Promise<number> {
-        return this.refereeService.end();
+    public final(
+        @CurrentUser() referee: Referee
+    ): Promise<number> {
+        return this.refereeService.end(referee);
     }
 
 }

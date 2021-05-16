@@ -272,8 +272,19 @@ export class RefereeService {
         return roles;
     }
 
-    public async end(): Promise<number> {
-        this.log.info('RefereeService:getRoles', { });
+    public async end(currentReferee: Referee): Promise<number> {
+        this.log.info('RefereeService:getRoles', { refereeId: currentReferee.id });
+        const referee: Referee = await this.refereeRepository.findOne(currentReferee.id, {
+            relations: ['points'],
+        });
+        console.log(referee);
+        let amount = 0;
+        if (referee.points && referee.points.length !== 0) {
+            for (const point of referee.points) {
+                amount += point.point;
+            }
+            return amount;
+        }
         return 0;
     }
 
