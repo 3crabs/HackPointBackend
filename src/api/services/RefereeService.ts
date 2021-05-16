@@ -79,6 +79,7 @@ export class RefereeService {
         this.log.info('RefereeService:createReferee', { body });
         const newReferee = new Referee();
         newReferee.name = body.name;
+        newReferee.surname = body.surname;
         newReferee.login = body.login;
         newReferee.password = crypto.createHash('md5').update(body.password).digest('hex');
         const savedReferee = await this.refereeRepository.save(newReferee);
