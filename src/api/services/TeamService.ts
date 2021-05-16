@@ -1,4 +1,5 @@
 import { plainToClass } from 'class-transformer';
+import { EQUALS } from 'class-validator';
 import { Service } from 'typedi';
 import { OrmRepository } from 'typeorm-typedi-extensions';
 
@@ -44,6 +45,22 @@ export class TeamService {
                 amount += point.point;
             }
             team.point = amount;
+        }
+        for (const t of teamResponse) {
+            const points = await this.pointRepository.find({
+                where: [
+                    { teamId: t.id },
+                    { refereeId: referee.id },
+                ]});
+            for (const p of points) {
+                if (p.referee.type === 'main') {
+                    t.amountReferee += p.point;
+                }
+                if (p.referee.type === 'regular') {
+                    t.amountNotReferee += p.point;
+                }
+                t.amountAll += p.point;
+            }
         }
         return teamResponse;
     }

@@ -178,6 +178,10 @@ export class RefereeService {
                 await this.noteRepository.save(newNote);
             }
         }
+        for (const team of teams) {
+            team.statusFinalPitch = null;
+            await this.teamRepository.save(team);
+        }
         return { status: 'OK', message: 'Started final pitch' };
     }
 

@@ -47,4 +47,13 @@ export class TeamResponse {
 
     @IsInt()
     public point: number;
+
+    @IsInt()
+    public amountAll: number;
+
+    @IsInt()
+    public amountReferee: number;
+
+    @IsInt()
+    public amountNotReferee: number;
 }
