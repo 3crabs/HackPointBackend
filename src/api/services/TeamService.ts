@@ -47,10 +47,10 @@ export class TeamService {
         }
         for (const t of teamResponse) {
             const points = await this.pointRepository.find({
-                where: [
-                    { teamId: t.id },
-                    { refereeId: referee.id },
-                ],
+                where: {
+                    teamId: t.id,
+                    refereeId: referee.id,
+                },
                 relations: ['referee'],
             });
             let amountAll = 0;
