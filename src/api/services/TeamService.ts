@@ -50,16 +50,24 @@ export class TeamService {
                 where: [
                     { teamId: t.id },
                     { refereeId: referee.id },
-                ]});
+                ],
+                relations: ['referee'],
+            });
+            let amountAll = 0;
+            let amountReferee = 0;
+            let amountNotReferee = 0;
             for (const p of points) {
                 if (p.referee.type === 'main') {
-                    t.amountReferee += p.point;
+                    amountReferee += p.point;
                 }
                 if (p.referee.type === 'regular') {
-                    t.amountNotReferee += p.point;
+                    amountNotReferee += p.point;
                 }
-                t.amountAll += p.point;
+                amountAll += p.point;
             }
+            t.amountAll = amountAll;
+            t.amountNotReferee = amountNotReferee;
+            t.amountReferee = amountReferee;
         }
         return teamResponse;
     }
