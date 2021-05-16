@@ -1,5 +1,4 @@
 import { plainToClass } from 'class-transformer';
-import { EQUALS } from 'class-validator';
 import { Service } from 'typedi';
 import { OrmRepository } from 'typeorm-typedi-extensions';
 
