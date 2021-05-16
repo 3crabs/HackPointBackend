@@ -255,6 +255,7 @@ export class RefereeService {
         const note: Note = await this.noteRepository.findOne({
             where: {
                 teamId,
+                refereeId: currentReferee.id,
             },
         });
         const pointsResponse = plainToClass<PointResponse, Point>(
