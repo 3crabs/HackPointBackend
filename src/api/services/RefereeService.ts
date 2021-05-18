@@ -282,7 +282,6 @@ export class RefereeService {
         const referee: Referee = await this.refereeRepository.findOne(currentReferee.id, {
             relations: ['points'],
         });
-        console.log(referee);
         let amount = 0;
         if (referee.points && referee.points.length !== 0) {
             for (const point of referee.points) {

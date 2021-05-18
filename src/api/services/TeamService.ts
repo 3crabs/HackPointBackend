@@ -1,5 +1,6 @@
 import { plainToClass } from 'class-transformer';
 import { Service } from 'typedi';
+import { In } from 'typeorm';
 import { OrmRepository } from 'typeorm-typedi-extensions';
 
 import { Logger, LoggerInterface } from '../../decorators/Logger';
@@ -33,53 +34,38 @@ export class TeamService {
             teams,
             { excludeExtraneousValues: true }
         );
-        for(const team of teamResponse) {
-            const points: Point[] = await this.pointRepository.find({
-                where: {
-                    teamId: team.id,
-                    refereeId: referee.id,
-                },
-            });
-            let amount = 0;
-            for (const point of points) {
-                amount += point.point;
-            }
-            team.point = amount;
-        }
-        for (const t of teamResponse) {
-            const points = await this.pointRepository.find({
-                where: {
-                    teamId: t.id,
-                },
-                relations: ['referee'],
-            });
-            let amountAll = 0;
-            let amountReferee = 0;
-            let amountNotReferee = 0;
-            for (const p of points) {
-                if (p.referee.type === 'main') {
-                    amountReferee += p.point;
-                }
-                if (p.referee.type === 'regular') {
-                    amountNotReferee += p.point;
-                }
-                amountAll += p.point;
-            }
-            t.amountAll = amountAll;
-            t.amountNotReferee = amountNotReferee;
-            t.amountReferee = amountReferee;
-        }
+        const points = await this.pointRepository.find({
+            where: {
+                teamId: In(teamResponse.map(team => team.id)),
+            },
+            relations: ['referee'],
+        });
+
+        teamResponse.forEach(team => {
+            this.setAmountsTeam(points, team.id, referee.id, team);
+        });
         return teamResponse;
     }
 
-    public async getTeamById(id: number): Promise<TeamResponse | undefined> {
-        this.log.info('TeamService:getTeamById', { TeamId: id });
+    public async getTeamById(id: number, referee: Referee): Promise<TeamResponse | undefined> {
+        this.log.info('TeamService:getTeamById', { teamId: id });
         const team = await this.teamRepository.findOne(id);
-        return plainToClass<TeamResponse, Team>(
+        if (!team) {
+            return undefined;
+        }
+        const teamResponse = plainToClass<TeamResponse, Team>(
             TeamResponse,
             team,
             { excludeExtraneousValues: true }
         );
+        const points = await this.pointRepository.find({
+            where: {
+                teamId: team.id,
+            },
+            relations: ['referee'],
+        });
+        this.setAmountsTeam(points, team.id, referee.id, teamResponse);
+        return teamResponse;
     }
 
     public async deleteTeam(id: number): Promise<TeamResponse | undefined> {
@@ -133,6 +119,31 @@ export class TeamService {
             await this.teamRepository.findOne(savedTeam.id),
             { excludeExtraneousValues: true }
         );
+    }
+
+    private setAmountsTeam(points: Point[], teamId: number, refereeId: number, teamResponse: TeamResponse): void {
+        let amountReferee = 0;
+        let amountAll = 0;
+        let amountNotReferee = 0;
+        let amount = 0;
+        points.forEach(point => {
+            if (point.referee.type === 'main' && point.teamId === teamId) {
+                amountReferee += point.point;
+            }
+            if (point.referee.type === 'regular' && point.teamId === teamId) {
+                amountNotReferee += point.point;
+            }
+            if (point.teamId === teamId) {
+                amountAll += point.point;
+            }
+            if (point.refereeId === refereeId && point.teamId === teamId) {
+                amount += point.point;
+            }
+        });
+        teamResponse.amountAll = amountAll;
+        teamResponse.amountReferee = amountReferee;
+        teamResponse.amountNotReferee = amountNotReferee;
+        teamResponse.point = amount;
     }
 
 }

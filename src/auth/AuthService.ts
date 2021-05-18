@@ -52,7 +52,6 @@ export class AuthService {
         const redisClient = (global as any).frameworkSettings.getData('redis_client');
         if (!req.headers.cookie) {
             const authorizationToken: string = req.headers.authorization;
-            console.log(authorizationToken);
             if (authorizationToken && authorizationToken.split(' ')[0] === 'Bearer') {
                 const accessToken: string = authorizationToken.split(' ')[1];
                 if (!accessToken) {

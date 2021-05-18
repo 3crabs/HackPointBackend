@@ -7,7 +7,7 @@ export class TeamResponse {
 
     @Expose()
     @IsInt()
-    public id: string;
+    public id: number;
 
     @Expose()
     @IsString()

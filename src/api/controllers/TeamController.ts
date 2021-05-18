@@ -59,8 +59,10 @@ export class TeamController {
     @ResponseSchema(TeamResponse, { description: 'team' })
     @ResponseSchema(ErrorResponse, { description: 'Unauthorized', statusCode: '401' })
     @ResponseSchema(ErrorResponse, { description: 'Access denied', statusCode: '403' })
-    public getTeamById(@Param('id') teamId: number): Promise<TeamResponse | undefined> {
-        return this.teamService.getTeamById(teamId);
+    public getTeamById(
+        @Param('id') teamId: number, @CurrentUser() referee: Referee
+    ): Promise<TeamResponse | undefined> {
+        return this.teamService.getTeamById(teamId, referee);
     }
 
     @Authorized(['referee'])
