@@ -2,7 +2,7 @@ import { plainToClass } from 'class-transformer';
 import crypto from 'crypto';
 import * as jwt from 'jsonwebtoken';
 import { Service } from 'typedi';
-import { Not } from 'typeorm';
+import { getConnection, Not } from 'typeorm';
 import { OrmRepository } from 'typeorm-typedi-extensions';
 import { v4 as uuid } from 'uuid';
 
@@ -82,11 +82,32 @@ export class RefereeService {
         newReferee.surname = body.surname;
         newReferee.login = body.login;
         newReferee.password = crypto.createHash('md5').update(body.password).digest('hex');
-        const savedReferee = await this.refereeRepository.save(newReferee);
-        this.log.info('RefereeService:addReferee:created', { refereeId: savedReferee.id });
+        const referee: Referee = await getConnection().transaction(async txEm => {
+            const savedReferee = await txEm.save(Referee, newReferee);
+            const teams: Team[] = await txEm.find(Team);
+            const criterions: Criterion[] = await txEm.find(Criterion);
+            for (const team of teams) {
+                for (const criterion of criterions) {
+                    const newPoint = new Point();
+                    newPoint.refereeId = savedReferee.id;
+                    newPoint.point = 0;
+                    newPoint.teamId = team.id;
+                    newPoint.criterionId = criterion.id;
+                    await txEm.save(Point, newPoint);
+                }
+                const newNote: Note = new Note();
+                newNote.refereeId = savedReferee.id;
+                newNote.teamId = team.id;
+                await txEm.save(Note, newNote);
+            }
+            return txEm.findOne(Referee, savedReferee.id, {
+                relations: ['points', 'notes'],
+            });
+        });
+        this.log.info('RefereeService:addReferee:created', { refereeId: referee.id });
         return plainToClass<RefereeResponse, Referee>(
             RefereeResponse,
-            await this.refereeRepository.findOne(savedReferee.id),
+            referee,
             { excludeExtraneousValues: true }
         );
     }
@@ -99,6 +120,7 @@ export class RefereeService {
         }
         body.id = referee.id;
         const savedReferee = await this.refereeRepository.save(body);
+        this.log.info('RefereeService:updateReferee:updated', { refereeId: savedReferee.id });
         return plainToClass<RefereeResponse, Referee>(
             RefereeResponse,
             await this.refereeRepository.findOne(savedReferee.id),
@@ -106,7 +128,7 @@ export class RefereeService {
         );
     }
 
-    public async loginReferee(login: string, password: string, isMobile: boolean = false): Promise<{ token: string; referee: Referee }> {
+    public async loginReferee(login: string, password: string, isMobile: boolean = false): Promise<{ token: string; referee: any }> {
         this.log.info('RefereeService:loginReferee', { login });
         const referee: Referee = await this.refereeRepository.findOne({
             where: {
