@@ -58,6 +58,7 @@ export const env = {
         rotate: toBool(getOsEnv('LOG_ROTATE')),
     },
     db: {
+        url: getOsEnvOptional('TYPEORM_URL'),
         type: getOsEnv('TYPEORM_CONNECTION'),
         host: getOsEnvOptional('TYPEORM_HOST'),
         port: toNumber(getOsEnvOptional('TYPEORM_PORT')),
