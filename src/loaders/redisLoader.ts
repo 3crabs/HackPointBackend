@@ -12,9 +12,10 @@ export const redisLoader: MicroframeworkLoader = (settings: MicroframeworkSettin
         bluebird.promisifyAll(redis.Multi.prototype);
 
         const client = redis.createClient({
-            host: env.redis.host,
-            port: env.redis.port,
-            password: env.redis.password,
+            uri: env.redis.uri,
+            // host: env.redis.host,
+            // port: env.redis.port,
+            // password: env.redis.password,
             retry_strategy: (options) => {
                 if (options.error) {
                     log.error('Redis Error (retry strategy):', options.error);

@@ -79,6 +79,7 @@ export const env = {
     },
     redis: {
         enabled: toBool(getOsEnv('REDIS_ENABLED')),
+        uri: getOsEnv('REDIS_URI'),
         host: getOsEnv('REDIS_HOST'),
         port: toNumber(getOsEnv('REDIS_PORT')),
         password: getOsEnvOptional('REDIS_PASSWORD'),
