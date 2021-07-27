@@ -14,6 +14,7 @@ export const redisLoader: MicroframeworkLoader = (settings: MicroframeworkSettin
         const client = redis.createClient({
             host: env.redis.host,
             port: env.redis.port,
+            password: env.redis.password,
             retry_strategy: (options) => {
                 if (options.error) {
                     log.error('Redis Error (retry strategy):', options.error);

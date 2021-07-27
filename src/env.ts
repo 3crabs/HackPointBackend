@@ -81,6 +81,7 @@ export const env = {
         enabled: toBool(getOsEnv('REDIS_ENABLED')),
         host: getOsEnv('REDIS_HOST'),
         port: toNumber(getOsEnv('REDIS_PORT')),
+        password: getOsEnvOptional('REDIS_PASSWORD'),
     },
     monitor: {
         enabled: toBool(getOsEnv('MONITOR_ENABLED')),
