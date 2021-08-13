@@ -34,7 +34,7 @@ export class RefereeController {
         private refereeService: RefereeService
     ) { }
 
-    @Authorized(['referee'])
+    // @Authorized(['referee'])
     @Get('/admin/referee')
     @OpenAPI({
         summary: 'get referees', description: 'Referees', security: [{ CookieAuth: [] }],
@@ -48,7 +48,7 @@ export class RefereeController {
         return this.refereeService.getReferees(skip, take);
     }
 
-    @Authorized(['referee'])
+    // @Authorized(['referee'])
     @Post('/admin/referee')
     @OpenAPI({
         summary: 'create referee', security: [{ CookieAuth: [] }],

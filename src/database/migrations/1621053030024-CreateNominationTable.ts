@@ -8,7 +8,7 @@ export class CreateNominationTable1621053030024 implements MigrationInterface {
             columns: [
                 {
                     name: 'id',
-                    type: 'serial',
+                    type: 'integer',
                     isPrimary: true,
                     isNullable: false,
                 }, {

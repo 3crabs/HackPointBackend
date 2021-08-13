@@ -8,7 +8,7 @@ export class CreateRefereeTable1621010898066 implements MigrationInterface {
             columns: [
                 {
                     name: 'id',
-                    type: 'serial',
+                    type: 'integer',
                     isPrimary: true,
                     isNullable: false,
                 }, {
