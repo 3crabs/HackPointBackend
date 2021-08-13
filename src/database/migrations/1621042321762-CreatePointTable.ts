@@ -8,7 +8,7 @@ export class CreatePointTable1621042321762 implements MigrationInterface {
             columns: [
                 {
                     name: 'id',
-                    type: 'serial',
+                    type: 'integer',
                     isPrimary: true,
                     isNullable: false,
                 }, {
