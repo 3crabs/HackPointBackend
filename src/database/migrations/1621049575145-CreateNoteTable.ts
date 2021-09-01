@@ -8,7 +8,7 @@ export class CreateNoteTable1621049575145 implements MigrationInterface {
             columns: [
                 {
                     name: 'id',
-                    type: 'serial',
+                    type: 'integer',
                     isPrimary: true,
                     isNullable: false,
                 }, {

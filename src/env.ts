@@ -60,12 +60,7 @@ export const env = {
     db: {
         url: getOsEnvOptional('TYPEORM_URL'),
         type: getOsEnv('TYPEORM_CONNECTION'),
-        host: getOsEnvOptional('TYPEORM_HOST'),
-        port: toNumber(getOsEnvOptional('TYPEORM_PORT')),
-        username: getOsEnvOptional('TYPEORM_USERNAME'),
-        password: getOsEnvOptional('TYPEORM_PASSWORD'),
         database: getOsEnv('TYPEORM_DATABASE'),
-        synchronize: toBool(getOsEnvOptional('TYPEORM_SYNCHRONIZE')),
         logging: getOsEnv('TYPEORM_LOGGING'),
     },
     swagger: {
