@@ -145,6 +145,14 @@ module.exports = {
          * Database scripts
          */
         db: {
+            igrate: {
+                script: series(
+                    'nps banner.migrate',
+                    'nps config',
+                    runFast('./node_modules/typeorm/cli.js migration:create -n InsertRefereeTable')
+                ),
+                description: 'Migrates the database to newest version available'
+            },
             migrate: {
                 script: series(
                     'nps banner.migrate',
