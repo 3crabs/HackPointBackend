@@ -30,6 +30,9 @@ export class Referee {
     public password: string;
 
     @Column()
+    public token: string;
+
+    @Column()
     public createdAt: number;
 
     @OneToMany(() => Point, point => point.referee)

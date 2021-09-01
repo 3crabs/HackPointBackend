@@ -4,7 +4,6 @@ import * as jwt from 'jsonwebtoken';
 import { Service } from 'typedi';
 import { getConnection, Not } from 'typeorm';
 import { OrmRepository } from 'typeorm-typedi-extensions';
-import { v4 as uuid } from 'uuid';
 
 import { Logger, LoggerInterface } from '../../decorators/Logger';
 import { env } from '../../env';
@@ -128,7 +127,7 @@ export class RefereeService {
         );
     }
 
-    public async loginReferee(login: string, password: string, isMobile: boolean = false): Promise<{ token: string; referee: any }> {
+    public async loginReferee(login: string, password: string): Promise<{ token: string; referee: any }> {
         this.log.info('RefereeService:loginReferee', { login });
         const referee: Referee = await this.refereeRepository.findOne({
             where: {
@@ -136,17 +135,10 @@ export class RefereeService {
                 password,
             },
         });
-        if (isMobile) {
-            const token: string = uuid();
-            const redisClient = (global as any).frameworkSettings.getData('redis_client');
-            await redisClient.setAsync(token, referee.id);
-            return  { token, referee };
-        } else {
-            const token: string = jwt.sign({ refereeId: referee.id, login: referee.login }, env.app.jwtSecret);
-            const redisClient = (global as any).frameworkSettings.getData('redis_client');
-            await redisClient.setAsync(token, JSON.stringify({ refereeId: referee.id, login: referee.login, role: referee.type }));
-            return { token, referee };
-        }
+        const token: string = jwt.sign({ refereeId: referee.id, login: referee.login, exp: Date.now() + (7200 * 1000) }, env.app.jwtSecret);
+        await this.refereeRepository.update(referee.id, { token });
+        this.log.info('RefereeService:updateReferee:updated', { refereeId: referee.id });
+        return { token, referee };
     }
 
     public async logoutReferee(cookie: string): Promise<void> {

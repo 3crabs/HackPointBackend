@@ -11,10 +11,10 @@ export const redisLoader: MicroframeworkLoader = (settings: MicroframeworkSettin
         bluebird.promisifyAll(redis.RedisClient.prototype);
         bluebird.promisifyAll(redis.Multi.prototype);
 
-        const client = redis.createClient(env.redis.uri, {
+        const client = redis.createClient({
             // uri: env.redis.uri,
-            // host: env.redis.host,
-            // port: env.redis.port,
+            host: env.redis.host,
+            port: env.redis.port,
             // password: env.redis.password,
             // user: '',
             tls: {

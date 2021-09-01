@@ -8,12 +8,6 @@ export const typeormLoader: MicroframeworkLoader = async (settings: Microframewo
     const loadedConnectionOptions = await getConnectionOptions();
 
     const connectionOptions = Object.assign(loadedConnectionOptions, {
-        extra: {
-            ssl: {
-                rejectUnauthorized: false,
-            },
-        },
-        ssl: true,
         type: env.db.type as any, // See createConnection options for valid types
         database: env.db.database,
         logging: env.db.logging,

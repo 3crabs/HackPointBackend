@@ -41,7 +41,7 @@ export class RefereeController {
     })
     @ResponseSchema(RefereeResponse, { description: 'Referees', isArray: true })
     @ResponseSchema(ErrorResponse, { description: 'Unauthorized', statusCode: '401' })
-    @ResponseSchema(ErrorResponse, { description: 'Access denied', statusCode: '401' })
+    @ResponseSchema(ErrorResponse, { description: 'Access denied', statusCode: '403' })
     public getReferees(
         @QueryParam('skip') skip: number, @QueryParam('take') take: number
     ): Promise<RefereeResponse[]> {
@@ -117,21 +117,15 @@ export class RefereeController {
         @Body({ validate: { whitelist: true } }) refereeData: RefereeLoginRequest, @Res() res: express.Response
     ): Promise<SuccessResponse> {
         const credentials = await this.refereeService.loginReferee(
-            refereeData.login, crypto.createHash('md5').update(refereeData.password).digest('hex'), refereeData.isMobile
+            refereeData.login, crypto.createHash('md5').update(refereeData.password).digest('hex')
         );
         const successResponse = new SuccessResponse();
         successResponse.status = 'OK';
-        successResponse.referee = credentials.referee;
-        if (refereeData.isMobile && credentials.token) {
-            res.header('Access-Token', credentials.token);
-            successResponse.token = credentials.token;
-        } else {
-            res.cookie('_auth', credentials.token, {
-                httpOnly: env.app.cookie.httpOnly,
-                secure: env.app.cookie.secure,
-                sameSite: env.app.cookie.sameSite,
-            });
-        }
+        res.cookie('_auth', credentials.token, {
+            httpOnly: env.app.cookie.httpOnly,
+            secure: env.app.cookie.secure,
+            sameSite: env.app.cookie.sameSite,
+        });
         return successResponse;
     }
 
