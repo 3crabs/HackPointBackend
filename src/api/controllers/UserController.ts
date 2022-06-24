@@ -1,9 +1,10 @@
 import crypto from 'crypto';
 import * as express from 'express';
-import { Body, JsonController, Post, Res } from 'routing-controllers';
+import { Body, Get, JsonController, Post, Res } from 'routing-controllers';
 import { OpenAPI, ResponseSchema } from 'routing-controllers-openapi';
 
 import { env } from '../../env';
+import { UserRole } from '../models/enums/UserRole';
 import { UserService } from '../services/UserService';
 import { CreationUserRequest } from './requests/CraetionUserRequest';
 import { LoginRequest } from './requests/LoginRequest';
@@ -23,7 +24,7 @@ export class UserController {
 
     @Post('/login')
     @OpenAPI({
-        tags: ['Auth'], summary: 'login referee',
+        tags: ['User'], summary: 'login user',
         responses: { 200: { headers: { 'Set-Cookie': { schema: {
             type: 'string', example: '_auth=abcdefghijklmnopqrstuvwxyz;Path=/;HttpOnly;SameSite=Strict;Secure' }, description: 'JWT access token in cookie' } },
         } },
@@ -64,5 +65,16 @@ export class UserController {
             sameSite: env.app.cookie.sameSite,
         });
         return credentials.user;
+    }
+
+    @Get('/roles')
+    @OpenAPI({
+        summary: 'get roles',
+    })
+    @ResponseSchema(UserRole as any, { isArray: true })
+    @ResponseSchema(ErrorResponse, { description: 'Unauthorized', statusCode: '401' })
+    @ResponseSchema(ErrorResponse, { description: 'Access denied', statusCode: '403' })
+    public getRoles(): Promise<UserRole[]> {
+        return this.userService.getRoles();
     }
 }

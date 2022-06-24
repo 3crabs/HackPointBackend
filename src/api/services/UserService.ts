@@ -8,6 +8,7 @@ import { Logger, LoggerInterface } from '../../decorators/Logger';
 import { env } from '../../env';
 import { CreationUserRequest } from '../controllers/requests/CraetionUserRequest';
 import { UserResponse } from '../controllers/responses/UserResponse';
+import { UserRole } from '../models/enums/UserRole';
 import { User } from '../models/User';
 import { UserRepository } from '../repositories/UserRepository';
 
@@ -41,8 +42,9 @@ export class UserService {
         newUser.login = body.login;
         newUser.password = crypto.createHash('md5').update(body.password).digest('hex');
         newUser.github = body.github;
-        newUser.birthDate = body.birthDate;
         newUser.isReferee = false;
+        newUser.role = body.role;
+        newUser.isVerified = false;
         const user = await this.userRepository.save(newUser);
         const token: string = jwt.sign({ userId: user.id, login: user.login, exp: Date.now() + (7200 * 1000) }, env.app.jwtSecret);
         await this.userRepository.update(user.id, { token });
@@ -52,5 +54,9 @@ export class UserService {
             user,
             { excludeExtraneousValues: true }
         ), token };
+    }
+
+    public async getRoles(): Promise<UserRole[]> {
+        return Object.values(UserRole);
     }
 }

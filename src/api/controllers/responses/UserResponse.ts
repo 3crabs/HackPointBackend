@@ -1,5 +1,5 @@
 import { Expose } from 'class-transformer';
-import { IsBoolean, IsInt, IsString } from 'class-validator';
+import { IsInt, IsString } from 'class-validator';
 
 export class UserResponse {
 
@@ -14,10 +14,6 @@ export class UserResponse {
     @Expose()
     @IsString()
     public github: string;
-
-    @Expose()
-    @IsBoolean()
-    public isReferee: boolean;
 
     @Expose()
     @IsInt()

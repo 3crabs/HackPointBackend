@@ -1,4 +1,6 @@
-import { IsOptional, IsString } from 'class-validator';
+import { IsEnum, IsOptional, IsString } from 'class-validator';
+
+import { UserRole } from '../../models/enums/UserRole';
 
 export class CreationUserRequest {
 
@@ -9,13 +11,12 @@ export class CreationUserRequest {
     @IsString()
     public surname: string;
 
-    @IsOptional()
-    @IsString()
-    public birthDate: number;
-
-    @IsOptional()
     @IsString()
     public login: string;
+
+    @IsEnum(UserRole)
+    @IsOptional()
+    public role: UserRole = UserRole.PARTICIPANT;
 
     @IsOptional()
     @IsString()

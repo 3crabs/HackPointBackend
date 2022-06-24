@@ -2,6 +2,7 @@ import {
     BeforeInsert, Column, Entity, JoinColumn, ManyToOne, OneToOne, PrimaryGeneratedColumn
 } from 'typeorm';
 
+import { UserRole } from './enums/UserRole';
 import { Referee } from './Referee';
 import { Team } from './Team';
 
@@ -21,6 +22,9 @@ export class User {
     public isReferee: boolean;
 
     @Column()
+    public isVerified: boolean;
+
+    @Column()
     public login: string;
 
     @Column()
@@ -31,6 +35,9 @@ export class User {
 
     @Column()
     public token: string;
+
+    @Column()
+    public role: UserRole;
 
     @Column()
     public teamId: number;
