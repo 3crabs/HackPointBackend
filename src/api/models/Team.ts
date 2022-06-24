@@ -1,6 +1,7 @@
-import { BeforeInsert, Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { BeforeInsert, Column, Entity, OneToMany, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
 
 import { Point } from './Point';
+import { User } from './User';
 
 export enum StatusTeam {
     UNMARKED = 'unmarked',
@@ -43,6 +44,9 @@ export class Team {
 
     @OneToMany(() => Point, point => point.team)
     public points: Point[];
+
+    @OneToOne(() => User, user => user.team)
+    public users: User[];
 
     @BeforeInsert()
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment

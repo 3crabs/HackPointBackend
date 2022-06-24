@@ -7,8 +7,21 @@ export const typeormLoader: MicroframeworkLoader = async (settings: Microframewo
 
     const loadedConnectionOptions = await getConnectionOptions();
 
+    // sql-lite
+    // const connectionOptions = Object.assign(loadedConnectionOptions, {
+    //     type: env.db.type as any, // See createConnection options for valid types
+    //     database: env.db.database,
+    //     logging: env.db.logging,
+    //     entities: env.app.dirs.entities,
+    //     migrations: env.app.dirs.migrations,
+    // });
+
     const connectionOptions = Object.assign(loadedConnectionOptions, {
         type: env.db.type as any, // See createConnection options for valid types
+        host: env.db.host,
+        port: env.db.port,
+        username: env.db.username,
+        password: env.db.password,
         database: env.db.database,
         logging: env.db.logging,
         entities: env.app.dirs.entities,

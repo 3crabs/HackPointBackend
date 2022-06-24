@@ -5,22 +5,22 @@ import {
 import * as crypto from 'crypto';
 import { getConnection } from 'typeorm';
 
-import { RefereeLoginRequest } from '../controllers/requests/RefereeLoginRequest';
-import { Referee } from '../models/Referee';
+import { LoginRequest } from '../controllers/requests/LoginRequest';
+import { User } from '../models/User';
 
 @ValidatorConstraint({ async: true })
 export class IsCorrectCredentialsConstraint implements ValidatorConstraintInterface {
 
     public async validate(text: string, args: ValidationArguments): Promise<boolean> {
         const connection = getConnection();
-        const refereeLogin = args.object as RefereeLoginRequest;
-        const referee = await connection.getRepository(Referee).findOne({
+        const userLogin = args.object as LoginRequest;
+        const user = await connection.getRepository(User).findOne({
             where: {
-                login: refereeLogin.login,
-                password: crypto.createHash('md5').update(refereeLogin.password).digest('hex'),
+                login: userLogin.login,
+                password: crypto.createHash('md5').update(userLogin.password).digest('hex'),
             },
         });
-        if (referee) {
+        if (user) {
             return true;
         } else {
             return false;

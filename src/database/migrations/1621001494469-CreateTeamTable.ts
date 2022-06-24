@@ -8,7 +8,7 @@ export class CreateTeamTable1621001494469 implements MigrationInterface {
             columns: [
                 {
                     name: 'id',
-                    type: 'integer',
+                    type: 'serial',
                     isPrimary: true,
                     isNullable: false,
                 }, {

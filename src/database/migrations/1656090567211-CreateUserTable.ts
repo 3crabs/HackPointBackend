@@ -1,10 +1,10 @@
 import { MigrationInterface, QueryRunner, Table } from 'typeorm';
 
-export class CreateRefereeTable1621010898066 implements MigrationInterface {
+export class CreateUserTable1656090567211 implements MigrationInterface {
 
     public async up(queryRunner: QueryRunner): Promise<any> {
         const table = new Table({
-            name: 'referee',
+            name: 'user',
             columns: [
                 {
                     name: 'id',
@@ -22,19 +22,34 @@ export class CreateRefereeTable1621010898066 implements MigrationInterface {
                     isPrimary: false,
                     isNullable: true,
                 }, {
-                    name: 'type',
+                    name: 'isReferee',
+                    type: 'boolean',
+                    isPrimary: false,
+                    isNullable: false,
+                    default: false,
+                }, {
+                    name: 'github',
                     type: 'text',
                     isPrimary: false,
                     isNullable: true,
-                    default: `'regular'`,
                 }, {
                     name: 'login',
                     type: 'text',
                     isPrimary: false,
                     isNullable: true,
                 }, {
+                    name: 'token',
+                    type: 'text',
+                    isPrimary: false,
+                    isNullable: true,
+                }, {
                     name: 'password',
                     type: 'text',
+                    isPrimary: false,
+                    isNullable: true,
+                }, {
+                    name: 'birthDate',
+                    type: 'double precision',
                     isPrimary: false,
                     isNullable: true,
                 }, {
@@ -50,7 +65,7 @@ export class CreateRefereeTable1621010898066 implements MigrationInterface {
     }
 
     public async down(queryRunner: QueryRunner): Promise<any> {
-        await queryRunner.dropTable('referee');
+        await queryRunner.dropTable('user');
     }
 
 }

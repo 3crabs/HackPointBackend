@@ -8,7 +8,7 @@ export class CreateCriterionTable1621028049484 implements MigrationInterface {
             columns: [
                 {
                     name: 'id',
-                    type: 'integer',
+                    type: 'serial',
                     isPrimary: true,
                     isNullable: false,
                 }, {
