@@ -1,6 +1,6 @@
 {
   "name": "hackpoint",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Node.js RESTful API Services with beautiful code written in TypeScript",
   "main": "src/app.ts",
   "scripts": {
@@ -8,20 +8,21 @@
     "test": "npm start test",
     "build": "npm start build",
     "presetup": "yarn install",
-    "setup": "npm start config && npm start setup.script"
+    "setup": "npm start config && npm start setup.script",
+    "typeorm": "ts-node ./node_modules/typeorm/cli.js"
   },
   "engines": {
-    "node": ">=8.0.0"
+    "node": ">=16.0.0"
   },
-  "repository": "https://gitlab.wintex.pro/m.efanov/typegraphql-boilerplate",
+  "repository": "https://github.com/3crabs/HackPointBackend",
   "keywords": [
     "NodeJS",
     "TypeScript",
     "express",
     "TypeGraphQl"
   ],
-  "homepage": "https://gitlab.wintex.pro/m.efanov",
-  "author": "m.efanov@wintex.pro",
+  "homepage": "https://github.com/Chessman97",
+  "author": "mikhailef@mail.ru",
   "contributors": [],
   "dependencies": {
     "@elastic/elasticsearch": "^7.8.0",
@@ -68,7 +69,7 @@
     "serve-favicon": "^2.5.0",
     "supertest": "^4.0.2",
     "swagger-ui-express": "^4.1.4",
-    "ts-node": "^8.10.2",
+    "ts-node": "^10.8.1",
     "type-graphql": "^1.0.0-rc.2",
     "typedi": "^0.8.0",
     "typeorm": "^0.2.36",
