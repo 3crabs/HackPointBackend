@@ -83,10 +83,10 @@ export class UserController {
         return this.userService.getRoles();
     }
 
-    @Authorized(['user'])
+    @Authorized(['user', 'referee'])
     @Get('/')
     @OpenAPI({
-        summary: 'get users',
+        summary: 'get users', security: [{ CookieAuth: [] }],
     })
     @ResponseSchema(UserResponse, { isArray: true })
     @ResponseSchema(ErrorResponse, { description: 'Unauthorized', statusCode: '401' })
@@ -99,7 +99,7 @@ export class UserController {
     @Authorized(['user'])
     @Get('/me')
     @OpenAPI({
-        summary: 'get users',
+        summary: 'get users', security: [{ CookieAuth: [] }],
     })
     @ResponseSchema(UserResponse, { isArray: true })
     @ResponseSchema(ErrorResponse, { description: 'Unauthorized', statusCode: '401' })

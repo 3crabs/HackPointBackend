@@ -30,10 +30,10 @@ export const swaggerLoader: MicroframeworkLoader = (settings: MicroframeworkSett
                     components: {
                         schemas,
                         securitySchemes: {
-                            ApiKeyAuth: {
+                            CookieAuth: {
                                 type: 'apiKey',
-                                in: 'header',
-                                name: 'Access',
+                                in: 'cookie',
+                                name: '_auth',
                             },
                         },
                     },
