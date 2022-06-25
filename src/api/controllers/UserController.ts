@@ -2,11 +2,12 @@ import { plainToClass } from 'class-transformer';
 import crypto from 'crypto';
 import * as express from 'express';
 import {
-    Authorized, Body, CurrentUser, Get, JsonController, Post, Put, Res
+    Authorized, Body, CurrentUser, Get, JsonController, Post, Put, Req, Res, UseBefore
 } from 'routing-controllers';
 import { OpenAPI, ResponseSchema } from 'routing-controllers-openapi';
 
 import { env } from '../../env';
+import { createMulterInstance, fileFilter } from '../../lib/multer';
 import { UserRole } from '../models/enums/UserRole';
 import { User } from '../models/User';
 import { UserService } from '../services/UserService';
@@ -124,5 +125,31 @@ export class UserController {
         @CurrentUser() user: User, @Body({ required: true, validate: true }) body: UpdationUserRequest
     ): Promise<UserResponse> {
         return this.userService.updateTeam(user.id, body);
+    }
+
+    @Authorized(['user'])
+    @UseBefore(
+        createMulterInstance(
+            {
+                fileSize: 5242880,
+            },
+            fileFilter
+        ).fields([{ name: 'image', maxCount: 10 }])
+    )
+    @Put('/avatar')
+    @OpenAPI({
+        security: [{ CookieAuth: [] }], summary: 'create banner news',
+        requestBody: { content: { 'multipart/form-data': { schema: { $ref: '#/components/schemas/NewEventDTO' } } } },
+    })
+    @ResponseSchema(Boolean)
+    @ResponseSchema(ErrorResponse, { description: 'Unauthorized', statusCode: '401' })
+    @ResponseSchema(ErrorResponse, { description: 'Access denied', statusCode: '403' })
+    public async updateAvatar(
+        @CurrentUser() user: User, @Req() req: any
+    ): Promise<boolean> {
+        if (!req.files?.['image']) {
+            throw new Error('BadRequestError');
+        }
+        return await this.userService.uploadAvatar(user.id, req.files);
     }
 }

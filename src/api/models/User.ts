@@ -37,6 +37,18 @@ export class User {
     public token: string;
 
     @Column()
+    public phone: string;
+
+    @Column()
+    public avatar: string;
+
+    @Column()
+    public email: string;
+
+    @Column()
+    public checkBox: boolean;
+
+    @Column()
     public role: UserRole;
 
     @Column()

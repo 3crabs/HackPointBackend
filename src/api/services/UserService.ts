@@ -43,6 +43,9 @@ export class UserService {
         }
         const newUser = new User();
         newUser.name = body.name;
+        newUser.checkBox = body.checkBox;
+        newUser.email = body.email;
+        newUser.phone = body.phone;
         newUser.surname = body.surname;
         newUser.login = body.login;
         newUser.password = crypto.createHash('md5').update(body.password).digest('hex');
@@ -90,5 +93,11 @@ export class UserService {
             await this.userRepository.findOne(savedTeam.id, { relations: ['team'] }),
             { excludeExtraneousValues: true }
         );
+    }
+
+    public async uploadAvatar(userId: number, files: any[]): Promise<boolean> {
+        this.log.info('NewsService:uploadAvatar', { files: files?.['image'][0], userId });
+        await this.userRepository.update(userId, { avatar: files?.['image'][0].filename});
+        return true;
     }
 }
