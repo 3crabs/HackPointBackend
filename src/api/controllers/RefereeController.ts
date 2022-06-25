@@ -1,8 +1,8 @@
 import crypto from 'crypto';
 import * as express from 'express';
 import {
-    Authorized, Body, CurrentUser, Delete, Get, JsonController, OnUndefined, Param, Post, Put,
-    QueryParam, Res
+    Authorized, Body, CurrentUser, Delete, Get, JsonController, OnUndefined, Param, Patch, Post,
+    Put, QueryParam, Res
 } from 'routing-controllers';
 import { OpenAPI, ResponseSchema } from 'routing-controllers-openapi';
 
@@ -14,6 +14,7 @@ import { RefereeNotFoundError } from '../errors/RefereeNotFoundError';
 import { Referee } from '../models/Referee';
 import { RefereeService } from '../services/RefereeService';
 import { AdminLoginRequest } from './requests/AdminLoginRequest';
+import { ApproveUserRequest } from './requests/ApproveUserRequest';
 import { CreationRefereeRequest } from './requests/CreationRefereeRequest';
 import { UpdationNoteRequest } from './requests/UpdationNoteRequest';
 import { UpdationPointRequest } from './requests/UpdationPointRequest';
@@ -304,6 +305,20 @@ export class RefereeController {
         @CurrentUser() referee: Referee
     ): Promise<number> {
         return this.refereeService.end(referee);
+    }
+
+    @Authorized(['referee'])
+    @Patch('/admin/user/:userId')
+    @OpenAPI({
+        summary: 'final', security: [{ CookieAuth: [] }],
+    })
+    @ResponseSchema(Boolean)
+    @ResponseSchema(ErrorResponse, { description: 'Unauthorized', statusCode: '401' })
+    @ResponseSchema(ErrorResponse, { description: 'Access denied', statusCode: '403' })
+    public approveUser(
+        @Param('userId') userId: number, @Body({ required: true, validate: true }) body: ApproveUserRequest
+    ): Promise<boolean> {
+        return this.refereeService.approveUser(userId, body);
     }
 
 }

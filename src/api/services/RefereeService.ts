@@ -1,12 +1,14 @@
 import { plainToClass } from 'class-transformer';
 import crypto from 'crypto';
 import * as jwt from 'jsonwebtoken';
+import { NotFoundError } from 'routing-controllers';
 import { Service } from 'typedi';
 import { getConnection, Not } from 'typeorm';
 import { OrmRepository } from 'typeorm-typedi-extensions';
 
 import { Logger, LoggerInterface } from '../../decorators/Logger';
 import { env } from '../../env';
+import { ApproveUserRequest } from '../controllers/requests/ApproveUserRequest';
 import { CreationRefereeRequest } from '../controllers/requests/CreationRefereeRequest';
 import { UpdationNoteRequest } from '../controllers/requests/UpdationNoteRequest';
 import { UpdationPointRequest } from '../controllers/requests/UpdationPointRequest';
@@ -21,11 +23,13 @@ import { Note } from '../models/Note';
 import { Point } from '../models/Point';
 import { Referee, RoleReferee } from '../models/Referee';
 import { StatusTeam, Team } from '../models/Team';
+import { User } from '../models/User';
 import { CriterionRepository } from '../repositories/CriterionRepository';
 import { NoteRepository } from '../repositories/NoteRepository';
 import { PointRepository } from '../repositories/PointRepository';
 import { RefereeRepository } from '../repositories/RefereeRepository';
 import { TeamRepository } from '../repositories/TeamRepository';
+import { UserRepository } from '../repositories/UserRepository';
 
 @Service()
 export class RefereeService {
@@ -36,6 +40,7 @@ export class RefereeService {
         @OrmRepository() private pointRepository: PointRepository,
         @OrmRepository() private noteRepository: NoteRepository,
         @OrmRepository() private criterionRepository: CriterionRepository,
+        @OrmRepository() private userRepository: UserRepository,
         @Logger(__filename) private log: LoggerInterface
     ) { }
 
@@ -304,6 +309,16 @@ export class RefereeService {
             return amount;
         }
         return 0;
+    }
+
+    public async approveUser(userId: number, body: ApproveUserRequest): Promise<boolean> {
+        this.log.info('RefereeService:approveUser', { userId, body });
+        const user: User = await this.userRepository.findOne(userId);
+        if (!user) {
+            throw new NotFoundError('User not found');
+        }
+        await this.userRepository.update(user.id, { role: body.role, isVerified: true });
+        return true;
     }
 
 }
