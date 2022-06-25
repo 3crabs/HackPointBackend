@@ -8,9 +8,11 @@ import { TeamNotFoundError } from '../errors/TeamNotFoundError';
 import { Referee } from '../models/Referee';
 import { TeamService } from '../services/TeamService';
 import { CreationTeamRequest } from './requests/CreationTeamRequest';
+import { CreationTeamUserRequest } from './requests/CreationTeamUserRequest';
 import { UpdationTeamRequest } from './requests/UpdationTeamRequest';
 import { ErrorResponse } from './responses/ErrorResponse';
 import { TeamResponse } from './responses/TeamResponse';
+import { TeamUserResponse } from './responses/TeamUserResponse';
 
 @JsonController()
 @OpenAPI({
@@ -22,8 +24,8 @@ export class TeamController {
         private teamService: TeamService
     ) { }
 
-    @Authorized(['referee'])
-    @Get('/admin/team')
+    @Authorized(['referee', 'user'])
+    @Get('/team')
     @OpenAPI({
         summary: 'get teams', description: 'Teams', security: [{ CookieAuth: [] }],
     })
@@ -48,6 +50,20 @@ export class TeamController {
         @Body({ required: true, validate: true }) body: CreationTeamRequest
     ): Promise<TeamResponse> {
         return this.teamService.createTeam(body);
+    }
+
+    @Authorized(['user'])
+    @Post('/user/team')
+    @OpenAPI({
+        summary: 'create team', security: [{ CookieAuth: [] }],
+    })
+    @ResponseSchema(TeamResponse, { description: 'teams' })
+    @ResponseSchema(ErrorResponse, { description: 'Unauthorized', statusCode: '401' })
+    @ResponseSchema(ErrorResponse, { description: 'Access denied', statusCode: '403' })
+    public createUserTeam(
+        @Body({ required: true, validate: true }) body: CreationTeamUserRequest
+    ): Promise<TeamUserResponse> {
+        return this.teamService.createUserTeam(body);
     }
 
     @Authorized(['referee'])

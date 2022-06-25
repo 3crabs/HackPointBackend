@@ -1,9 +1,6 @@
 import { Expose, Type } from 'class-transformer';
-import {
-    IsBoolean, IsEnum, IsInt, IsObject, IsOptional, IsString, ValidateNested
-} from 'class-validator';
+import { IsInt, IsObject, IsOptional, IsString, ValidateNested } from 'class-validator';
 
-import { UserRole } from '../../models/enums/UserRole';
 import { RefereeResponse } from './RefereeResponse';
 import { TeamResponse } from './TeamResponse';
 
@@ -15,14 +12,6 @@ export class UserResponse {
 
     @Expose()
     @IsString()
-    public name: string;
-
-    @Expose()
-    @IsString()
-    public surname: string;
-
-    @Expose()
-    @IsString()
     public login: string;
 
     @Expose()
@@ -30,20 +19,8 @@ export class UserResponse {
     public github: string;
 
     @Expose()
-    @IsBoolean()
-    public isVerified: boolean;
-
-    @Expose()
     @IsInt()
     public createdAt: number;
-
-    @Expose()
-    @IsInt()
-    public teamId: number;
-
-    @Expose()
-    @IsEnum(UserRole)
-    public role: UserRole;
 
     @Expose()
     @IsOptional()

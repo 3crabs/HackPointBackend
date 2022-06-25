@@ -1,13 +1,18 @@
+import { plainToClass } from 'class-transformer';
 import crypto from 'crypto';
 import * as express from 'express';
-import { Body, Get, JsonController, Post, Res } from 'routing-controllers';
+import {
+    Authorized, Body, CurrentUser, Get, JsonController, Post, Put, Res
+} from 'routing-controllers';
 import { OpenAPI, ResponseSchema } from 'routing-controllers-openapi';
 
 import { env } from '../../env';
 import { UserRole } from '../models/enums/UserRole';
+import { User } from '../models/User';
 import { UserService } from '../services/UserService';
 import { CreationUserRequest } from './requests/CraetionUserRequest';
 import { LoginRequest } from './requests/LoginRequest';
+import { UpdationUserRequest } from './requests/UpdationUserRequest';
 import { ErrorResponse } from './responses/ErrorResponse';
 import { SuccessResponse } from './responses/SuccessResponse';
 import { UserResponse } from './responses/UserResponse';
@@ -71,10 +76,53 @@ export class UserController {
     @OpenAPI({
         summary: 'get roles',
     })
-    @ResponseSchema(UserRole as any, { isArray: true })
+    @ResponseSchema(String, { isArray: true })
     @ResponseSchema(ErrorResponse, { description: 'Unauthorized', statusCode: '401' })
     @ResponseSchema(ErrorResponse, { description: 'Access denied', statusCode: '403' })
     public getRoles(): Promise<UserRole[]> {
         return this.userService.getRoles();
+    }
+
+    @Authorized(['user'])
+    @Get('/')
+    @OpenAPI({
+        summary: 'get users',
+    })
+    @ResponseSchema(UserResponse, { isArray: true })
+    @ResponseSchema(ErrorResponse, { description: 'Unauthorized', statusCode: '401' })
+    @ResponseSchema(ErrorResponse, { description: 'Access denied', statusCode: '403' })
+    public getUsers(@CurrentUser() user: User): Promise<UserResponse[]> {
+        console.log(user);
+        return this.userService.getUsers();
+    }
+
+    @Authorized(['user'])
+    @Get('/me')
+    @OpenAPI({
+        summary: 'get users',
+    })
+    @ResponseSchema(UserResponse, { isArray: true })
+    @ResponseSchema(ErrorResponse, { description: 'Unauthorized', statusCode: '401' })
+    @ResponseSchema(ErrorResponse, { description: 'Access denied', statusCode: '403' })
+    public async getMe(@CurrentUser() user: User): Promise<UserResponse> {
+        return plainToClass<UserResponse, User>(
+            UserResponse,
+            user,
+            { excludeExtraneousValues: true }
+        );
+    }
+
+    @Authorized(['user'])
+    @Put('/')
+    @OpenAPI({
+        summary: 'update user', security: [{ CookieAuth: [] }],
+    })
+    @ResponseSchema(UserResponse)
+    @ResponseSchema(ErrorResponse, { description: 'Unauthorized', statusCode: '401' })
+    @ResponseSchema(ErrorResponse, { description: 'Access denied', statusCode: '403' })
+    public updateTeam(
+        @CurrentUser() user: User, @Body({ required: true, validate: true }) body: UpdationUserRequest
+    ): Promise<UserResponse> {
+        return this.userService.updateTeam(user.id, body);
     }
 }

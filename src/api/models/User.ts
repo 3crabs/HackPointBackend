@@ -51,7 +51,7 @@ export class User {
     @Column()
     public createdAt: number;
 
-    @ManyToOne(() => Team, team => team.points)
+    @ManyToOne(() => Team, team => team.users)
     @JoinColumn()
     public team: Team;
 

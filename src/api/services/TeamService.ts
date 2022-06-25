@@ -1,12 +1,15 @@
 import { plainToClass } from 'class-transformer';
+import { BadRequestError } from 'routing-controllers';
 import { Service } from 'typedi';
 import { In } from 'typeorm';
 import { OrmRepository } from 'typeorm-typedi-extensions';
 
 import { Logger, LoggerInterface } from '../../decorators/Logger';
 import { CreationTeamRequest } from '../controllers/requests/CreationTeamRequest';
+import { CreationTeamUserRequest } from '../controllers/requests/CreationTeamUserRequest';
 import { UpdationTeamRequest } from '../controllers/requests/UpdationTeamRequest';
 import { TeamResponse } from '../controllers/responses/TeamResponse';
+import { TeamUserResponse } from '../controllers/responses/TeamUserResponse';
 import { Point } from '../models/Point';
 import { Referee } from '../models/Referee';
 import { StatusTeam, Team } from '../models/Team';
@@ -28,6 +31,7 @@ export class TeamService {
             skip,
             take,
             order: { name: 'ASC' },
+            relations: ['users'],
         });
         const teamResponse = plainToClass<TeamResponse, Team>(
             TeamResponse,
@@ -98,6 +102,23 @@ export class TeamService {
         this.log.info('TeamService:addTeam:created', { teamId: savedTeam.id });
         return plainToClass<TeamResponse, Team>(
             TeamResponse,
+            await this.teamRepository.findOne(savedTeam.id),
+            { excludeExtraneousValues: true }
+        );
+    }
+
+    public async createUserTeam(body: CreationTeamUserRequest): Promise<TeamUserResponse> {
+        this.log.info('TeamService:createUserTeam', { body });
+        if (await this.teamRepository.findOne({ where: { name: body.name }})) {
+            throw new BadRequestError('Duplicated team');
+        }
+        const newTeam = new Team();
+        newTeam.name = body.name;
+        newTeam.isBlocked = false;
+        const savedTeam = await this.teamRepository.save(newTeam);
+        this.log.info('TeamService:createUserTeam:created', { teamId: savedTeam.id });
+        return plainToClass<TeamUserResponse, Team>(
+            TeamUserResponse,
             await this.teamRepository.findOne(savedTeam.id),
             { excludeExtraneousValues: true }
         );

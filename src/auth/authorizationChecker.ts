@@ -13,10 +13,20 @@ export function authorizationChecker(connection: Connection): (action: Action, r
     return async function innerAuthorizationChecker(action: Action, roles: string[]): Promise<boolean> {
 
         let user: any;
-        if (roles.find((element) => element.startsWith('referee'))) {
-            user = await authService.getAdminByAccessCookie(action.request);
-        } else {
-            user = await authService.getMerchantByAccessToken(action.request);
+        for (const role of roles) {
+            // if (roles.find((element) => element.startsWith('referee'))) {
+            //     user = await authService.getAdminByAccessCookie(action.request);
+            // } else {
+            //     user = await authService.getUserByAccessToken(action.request);
+            // }
+            if (role === 'referee') {
+                user = await authService.getAdminByAccessCookie(action.request);
+            } else {
+                user = await authService.getUserByAccessToken(action.request);
+            }
+            if (user) {
+                break;
+            }
         }
         if (user === undefined) {
             log.warn('authorizationChecker:innerAuthorizationChecker:warning', { message: 'No credentials given' });

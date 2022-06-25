@@ -13,8 +13,8 @@ import { PointNotFoundError } from '../errors/PointNotFoundError';
 import { RefereeNotFoundError } from '../errors/RefereeNotFoundError';
 import { Referee } from '../models/Referee';
 import { RefereeService } from '../services/RefereeService';
+import { AdminLoginRequest } from './requests/AdminLoginRequest';
 import { CreationRefereeRequest } from './requests/CreationRefereeRequest';
-import { LoginRequest } from './requests/LoginRequest';
 import { UpdationNoteRequest } from './requests/UpdationNoteRequest';
 import { UpdationPointRequest } from './requests/UpdationPointRequest';
 import { UpdationRefereeRequest } from './requests/UpdationRefereeRequest';
@@ -120,7 +120,7 @@ export class RefereeController {
     @ResponseSchema(ErrorResponse, { description: 'Login or password not correct.', statusCode: '400' })
     @ResponseSchema(ErrorResponse, { description: 'Access denied.', statusCode: '403' })
     public async login(
-        @Body({ validate: { whitelist: true } }) refereeData: LoginRequest, @Res() res: express.Response
+        @Body({ validate: { whitelist: true } }) refereeData: AdminLoginRequest, @Res() res: express.Response
     ): Promise<SuccessResponse> {
         const credentials = await this.refereeService.loginReferee(
             refereeData.login, crypto.createHash('md5').update(refereeData.password).digest('hex')

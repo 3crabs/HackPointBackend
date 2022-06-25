@@ -1,5 +1,5 @@
-import { Expose } from 'class-transformer';
-import { IsEnum, IsInt, IsNumber, IsString } from 'class-validator';
+import { Expose, Type } from 'class-transformer';
+import { IsEnum, IsInt, IsNumber, IsString, ValidateNested } from 'class-validator';
 
 import { StatusTeam } from '../../models/Team';
 
@@ -45,6 +45,11 @@ export class TeamResponse {
     @IsNumber()
     public createdAt: number;
 
+    @Expose()
+    @ValidateNested({ each: true })
+    @Type(() => TeamUserResponse)
+    public users: TeamUserResponse[];
+
     @IsInt()
     public point: number;
 
@@ -56,4 +61,24 @@ export class TeamResponse {
 
     @IsInt()
     public amountNotReferee: number;
+}
+
+export class TeamUserResponse {
+
+    @Expose()
+    @IsInt()
+    public id: string;
+
+    @Expose()
+    @IsString()
+    public login: string;
+
+    @Expose()
+    @IsString()
+    public github: string;
+
+    @Expose()
+    @IsInt()
+    public createdAt: number;
+
 }

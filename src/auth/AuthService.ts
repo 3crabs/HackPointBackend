@@ -5,6 +5,7 @@ import { Service } from 'typedi';
 import { OrmRepository } from 'typeorm-typedi-extensions';
 
 import { RefereeRepository } from '../api/repositories/RefereeRepository';
+import { UserRepository } from '../api/repositories/UserRepository';
 import { Logger, LoggerInterface } from '../decorators/Logger';
 import { env } from '../env';
 
@@ -13,37 +14,37 @@ export class AuthService {
 
     public constructor(
         @Logger(__filename) private log: LoggerInterface,
-        @OrmRepository() private refereeRepository: RefereeRepository
+        @OrmRepository() private refereeRepository: RefereeRepository,
+        @OrmRepository() private userRepository: UserRepository
     ) { }
 
-    public async getMerchantByAccessToken(req: IncomingMessage | express.Request): Promise<any> {
+    public async getUserByAccessToken(req: express.Request & IncomingMessage): Promise<any> {
 
-        const authorization: string = req.headers.authorization;
+        const authorization = req.cookies['_auth'];
+        console.log(req.cookies['_auth']);
 
-        if (authorization && authorization.split(' ')[0] === 'Bearer') {
-            this.log.info('AuthService:getMerchantByAccessToken', { message: 'Credentials provided by the client' });
-            const accessToken: string = authorization.split(' ')[1];
-            if (!accessToken) {
-                this.log.warn('AuthService:getMerchantByAccessToken', { message: 'Token not found.' });
+        if (authorization) {
+            this.log.info('AuthService:getUserByAccessToken', { message: 'Admin credentials provided by the client' });
+            let decoded: any;
+            try {
+                decoded = jwt.verify(authorization, env.app.jwtSecret);
+            } catch (error) {
                 return undefined;
             }
-            // const merchant: Merchant = await this.merchantRepository.findOne({
-            //     where: {
-            //         id: accessToken,
-            //     },
-            //     relations: ['permissionList'],
-            // });
-            // if (!merchant) {
-            //     this.log.warn('AuthService:getMerchantByAccessToken', { message: 'Merchant not found in system.' });
-            //     return undefined;
-            // }
-            // if (merchant.name !== 'fee' && !merchant.permissionList.canLogin) {
-            //     this.log.warn('AuthService:getMerchantByAccessToken', { message: 'Merchant blocked by system.' });
-            //     return undefined;
-            // }
-            // return merchant;
+            if (decoded.exp < Date.now()) {
+                return undefined;
+            }
+            const userId = decoded.userId;
+            if (userId) {
+                const user = await this.userRepository.findOne(userId, { relations: ['team'] });
+                if (!user) {
+                    this.log.warn('AuthService:getUserByAccessToken', { message: 'This user was deleted by system', userId });
+                    return undefined;
+                }
+                return user;
+            }
         }
-        this.log.warn('AuthService:getMerchantByAccessToken', { message: 'No credentials provided by the client.' });
+        this.log.warn('AuthService:getUserByAccessToken', { message: 'No credentials provided by the client' });
         return undefined;
     }
 
@@ -54,12 +55,12 @@ export class AuthService {
 
         if (authorization) {
             this.log.info('AuthService:getAdminByAccessCookie', { message: 'Admin credentials provided by the client' });
-            const refereeByToken = await this.refereeRepository.findOne({
-                where: {
-                    token: authorization,
-                },
-            });
-            console.log(refereeByToken);
+            // const refereeByToken = await this.refereeRepository.findOne({
+            //     where: {
+            //         token: authorization,
+            //     },
+            // });
+            // console.log(refereeByToken);
             let decoded: any;
             try {
                 decoded = jwt.verify(authorization, env.app.jwtSecret);
