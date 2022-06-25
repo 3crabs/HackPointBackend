@@ -1,6 +1,9 @@
-import { Authorized, Body, Get, JsonController, Post } from 'routing-controllers';
+import {
+    Authorized, Body, Get, JsonController, Post, Put, Req, UseBefore
+} from 'routing-controllers';
 import { OpenAPI, ResponseSchema } from 'routing-controllers-openapi';
 
+import { createMulterInstance, fileFilter } from '../../lib/multer';
 import { HackatonService } from '../services/HackatonService';
 import { CreationHackatonRequest } from './requests/CreationHackatonRequest';
 import { ErrorResponse } from './responses/ErrorResponse';
@@ -40,6 +43,31 @@ export class HackatonController {
     @ResponseSchema(ErrorResponse, { description: 'Access denied', statusCode: '403' })
     public getHackaton(): Promise<HackatonResponse> {
         return this.hackatonService.getHackaton();
+    }
+
+    @Authorized(['referee'])
+    @UseBefore(
+        createMulterInstance(
+            {
+                fileSize: 5242880,
+            },
+            fileFilter
+        ).fields([{ name: 'image', maxCount: 10 }])
+    )
+    @Put('/banner')
+    @OpenAPI({
+        security: [{ CookieAuth: [] }], summary: 'create event',
+        requestBody: { content: { 'multipart/form-data': { schema: { $ref: '#/components/schemas/NewEventDTO' } } } },
+    })
+    // @ResponseSchema(NewEventResponse, { description: 'New event`s entity' })
+    @ResponseSchema(ErrorResponse, { description: 'Invalid body.', statusCode: '400' })
+    @ResponseSchema(ErrorResponse, { description: 'Access denied.', statusCode: '403' })
+    public async createEvent(@Req() req: any): Promise<any> {
+        // tslint:disable-next-line:no-string-literal
+        if (!req.files?.['image']) {
+            throw new Error('BadRequestError');
+        }
+        return await this.hackatonService.uploadFile(req.files);
     }
 
 }

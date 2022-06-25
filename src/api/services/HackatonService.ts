@@ -44,4 +44,11 @@ export class HackatonService {
             { excludeExtraneousValues: true }
         );
     }
+
+    public async uploadFile(files: any[]): Promise<boolean> {
+        this.log.info('HackatonService:uploadFile',files?.['image'][0]);
+        const hackatons = await this.hackatonRepository.find();
+        await this.hackatonRepository.update(hackatons[0].id, { banner: files?.['image'][0].filename});
+        return true;
+    }
 }

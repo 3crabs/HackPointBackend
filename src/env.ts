@@ -25,6 +25,7 @@ export const env = {
         version: (pkg as any).version,
         description: (pkg as any).description,
         host: getOsEnv('APP_HOST'),
+        images: getOsEnv('IMAGES_UPLOAD_PATH'),
         schema: getOsEnv('APP_SCHEMA'),
         routePrefix: getOsEnv('APP_ROUTE_PREFIX'),
         port: normalizePort(process.env.PORT || getOsEnv('APP_PORT')),
