@@ -59,10 +59,10 @@ export class HackatonController {
         security: [{ CookieAuth: [] }], summary: 'create event',
         requestBody: { content: { 'multipart/form-data': { schema: { $ref: '#/components/schemas/NewEventDTO' } } } },
     })
-    // @ResponseSchema(NewEventResponse, { description: 'New event`s entity' })
+    @ResponseSchema(Boolean)
     @ResponseSchema(ErrorResponse, { description: 'Invalid body.', statusCode: '400' })
     @ResponseSchema(ErrorResponse, { description: 'Access denied.', statusCode: '403' })
-    public async createEvent(@Req() req: any): Promise<any> {
+    public async createEvent(@Req() req: any): Promise<boolean> {
         // tslint:disable-next-line:no-string-literal
         if (!req.files?.['image']) {
             throw new Error('BadRequestError');
